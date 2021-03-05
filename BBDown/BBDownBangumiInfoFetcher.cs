@@ -23,6 +23,22 @@ namespace BBDown
             JArray pages = JArray.Parse(infoJson["result"]["episodes"].ToString());
             List<Page> pagesInfo = new List<Page>();
             int i = 1;
+
+            if (pages.Count == 0)
+            {
+                if (infoJson["result"]["section"] != null)
+                {
+                    foreach (JObject section in JArray.Parse(infoJson["result"]["section"].ToString()))
+                    {
+                        if (section.ToString().Contains($"/ep{id}"))
+                        {
+                            pages = JArray.Parse(section["episodes"].ToString());
+                            break;
+                        }
+                    }
+                }
+            }
+
             foreach (JObject page in pages)
             {
                 string res = "";
@@ -31,21 +47,22 @@ namespace BBDown
                     res = page["dimension"]["width"].ToString() + "x" + page["dimension"]["height"].ToString();
                 }
                 catch (Exception) { }
-                string _title = page["long_title"].ToString();
-                if(string.IsNullOrEmpty(_title)) _title = page["title"].ToString();
+                string _title = page["long_title"].ToString().Trim();
+                if (string.IsNullOrEmpty(_title)) _title = page["title"].ToString();
                 Page p = new Page(i++,
                     page["aid"].ToString(),
                     page["cid"].ToString(),
                     page["id"].ToString(),
-                    GetValidFileName(_title),
+                    _title,
                     0, res);
                 if (p.epid == id) index = p.index.ToString();
                 pagesInfo.Add(p);
             }
 
+
             var info = new BBDownVInfo();
-            info.Title = GetValidFileName(title).Trim();
-            info.Desc = GetValidFileName(desc).Trim();
+            info.Title = title.Trim();
+            info.Desc = desc.Trim();
             info.Pic = cover;
             info.PubTime = pubTime;
             info.PagesInfo = pagesInfo;

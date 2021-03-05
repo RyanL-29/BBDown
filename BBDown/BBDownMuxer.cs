@@ -8,6 +8,7 @@ using static BBDown.BBDownUtil;
 using static BBDown.BBDownSubUtil;
 using static BBDown.BBDownLogger;
 using System.IO;
+using OpenCC.NET;
 
 namespace BBDown
 {
@@ -35,8 +36,16 @@ namespace BBDown
             return code;
         }
 
-        public static int MuxAV(string videoPath, string audioPath, string outPath, string desc = "", string title = "", string episodeId = "", string pic = "", List<Subtitle> subs = null, bool audioOnly = false, bool videoOnly = false)
+        private static string EscapeString(string str)
         {
+            return str.Replace("\"", "'");
+        }
+
+        public static int MuxAV(string videoPath, string audioPath, string outPath, string desc = "", string title = "", string episodeId = "", string pic = "", string lang = "", List<Subtitle> subs = null, bool audioOnly = false, bool videoOnly = false, string aid = "", string cid = "")
+        {
+            desc = EscapeString(desc);
+            title = EscapeString(title);
+
             if (outPath.Contains("/") && ! Directory.Exists(Path.GetDirectoryName(outPath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(outPath));
             //----分析并生成-i参数
@@ -48,13 +57,27 @@ namespace BBDown
                 inputArg.Append($" -i \"{audioPath}\" ");
             if (!string.IsNullOrEmpty(pic))
                 inputArg.Append($" -i \"{pic}\" ");
+            string[] files = System.IO.Directory.GetFiles(Directory.GetCurrentDirectory(), $"temp/{aid}/{aid}.{cid}.*.srt");
             if (subs != null)
             {
                 for (int i = 0; i < subs.Count; i++)
                 {
-                    inputArg.Append($" -i \"{subs[i].path}\" ");
-                    metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} ");
+                    if (File.Exists(subs[i].path) && File.ReadAllText(subs[i].path) != "")
+                    {
+                        inputArg.Append($" -i \"{subs[i].path}\" ");
+                        metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} -metadata:s:s:{i} title=\"{SubTitleDic[subs[i].lan]}\"");
+                    }
                 }
+                if (files.Length > 0 && subs.Count < 1)
+                {
+                    Log("正在合併現有字幕...");
+                    for (int e = 0; e < files.Length; e++)
+                    {
+                        inputArg.Append($" -i \"{files[e]}\" ");
+                    }
+
+                }
+
             }
             if (!string.IsNullOrEmpty(pic))
                 metaArg.Append(" -disposition:v:1 attached_pic ");
@@ -63,12 +86,15 @@ namespace BBDown
             {
                 inputArg.Append($" -map {i} ");
             }
-
+            var converter = new OpenChineseConverter();
+            string titletcov = converter.ToTaiwanFromSimplifiedWithPhrases(title);
+            string desccov = converter.ToTaiwanFromSimplifiedWithPhrases(desc);
             //----分析完毕
             var arguments = $"-loglevel warning -y " +
-                 inputArg.ToString() + metaArg.ToString() + $" -metadata title=\"" + (episodeId == "" ? title : episodeId) + "\" " +
-                 $"-metadata description=\"{desc}\" " +
-                 (episodeId == "" ? "" : $"-metadata album=\"{title}\" ") +
+                 inputArg.ToString() + metaArg.ToString() + $" -metadata title=\"" + titletcov + "\" " +
+                 (lang == "" ? "" : $"-metadata:s:a:0 language={lang} ") +
+                 $"-metadata description=\"{desccov}\" " +
+                 (episodeId == "" ? "" : $"-metadata album=\"{titletcov}\" ") +
                  (audioOnly ? " -vn " : "") + (videoOnly ? " -an " : "") +
                  $"-c copy " +
                  (subs != null ? " -c:s mov_text " : "") +

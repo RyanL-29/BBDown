@@ -7,17 +7,48 @@ using static BBDown.BBDownEntity;
 using static BBDown.BBDownUtil;
 using static BBDown.BBDownLogger;
 using System.Text.RegularExpressions;
+using OpenCC.NET;
 
 namespace BBDown
 {
     class BBDownSubUtil
     {
-        public static List<Subtitle> GetSubtitles(string aid, string cid)
+        public static List<Subtitle> GetSubtitles(string aid, string cid, string epId, bool intl)
         {
             List<Subtitle> subtitles = new List<Subtitle>();
+            if (intl)
+            {
+                try
+                {
+                    string api = $"https://app.global.bilibili.com/intl/gateway/v2/app/subtitle?&ep_id={epId}";
+                    string json = GetWebSource(api);
+                    JObject infoJson = JObject.Parse(json);
+                    JArray subs = JArray.Parse(infoJson["data"]["subtitles"].ToString());
+                    foreach (JObject sub in subs)
+                    {
+                        Subtitle subtitle = new Subtitle();
+                        subtitle.url = sub["url"].ToString();
+                        subtitle.lan = sub["key"].ToString();
+                        subtitle.path = $"temp/{aid}/{aid}.{cid}.{subtitle.lan}.srt";
+                        subtitles.Add(subtitle);
+                        if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN")
+                        {
+                            Log("now convert");
+                            Subtitle subtitleb = new Subtitle();
+                            subtitleb.url = sub["url"].ToString();
+                            subtitleb.lan = "chs-cht";
+                            subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
+                            subtitles.Add(subtitleb);
+                        }
+                    }
+                    return subtitles;
+                }
+                catch (Exception) { return subtitles; } //返回空列表
+            }
+
             try
             {
-                string api = $"https://api.bilibili.com/x/web-interface/view?aid={aid}&cid={cid}";
+                string api = $"https://api.bilibili.com/x/web-interface/view?aid={aid}&oid={cid}";
                 string json = GetWebSource(api);
                 JObject infoJson = JObject.Parse(json);
                 JArray subs = JArray.Parse(infoJson["data"]["subtitle"]["list"].ToString());
@@ -26,8 +57,22 @@ namespace BBDown
                     Subtitle subtitle = new Subtitle();
                     subtitle.url = sub["subtitle_url"].ToString();
                     subtitle.lan = sub["lan"].ToString();
-                    subtitle.path = $"{aid}/{aid}.{cid}.{subtitle.lan}.srt";
+                    subtitle.path = $"temp/{aid}/{aid}.{cid}.{subtitle.lan}.srt";
                     subtitles.Add(subtitle);
+                    if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN")
+                    {
+                        Log("now convert");
+                        Subtitle subtitleb = new Subtitle();
+                        subtitleb.url = sub["subtitle_url"].ToString();
+                        subtitleb.lan = "chs-cht";
+                        subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
+                        subtitles.Add(subtitleb);
+                    }
+				                //无字幕片源 但是字幕没上导致的空列表，尝试从国际接口获取
+                if (subtitles.Count == 0)
+					{
+						return GetSubtitles(aid, cid, epId, true);
+					}
                 }
                 return subtitles;
             }
@@ -61,14 +106,24 @@ namespace BBDown
                     data[i++] = Convert.ToByte(_type);
                     string t = GetPostResponse(api, data);
                     Regex reg = new Regex("(zh-Han[st]).*?(http.*?\\.json)");
-                    foreach(Match m in reg.Matches(t))
+                    foreach (Match m in reg.Matches(t))
                     {
                         Subtitle subtitle = new Subtitle();
                         subtitle.url = m.Groups[2].Value;
                         subtitle.lan = m.Groups[1].Value;
-                        subtitle.path = $"{aid}/{aid}.{cid}.{subtitle.lan}.srt";
+                        subtitle.path = $"temp/{aid}/{aid}.{cid}.{subtitle.lan}.srt";
                         subtitles.Add(subtitle);
+                        if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN")
+                        {
+                            Log("now convert");
+                            Subtitle subtitleb = new Subtitle();
+                            subtitleb.url = m.Groups[2].Value;
+                            subtitleb.lan = "chs-cht";
+                            subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
+                            subtitles.Add(subtitleb);
+                        }
                     }
+                    
                     return subtitles;
                 }
                 catch (Exception) { return subtitles; } //返回空列表
@@ -77,7 +132,14 @@ namespace BBDown
 
         public static void SaveSubtitle(string url, string path)
         {
+            if (path.Contains("chs-cht") == true)
+            {
+                File.WriteAllText(path, ConvertSubFromJsonconvert(GetWebSource(url)), new UTF8Encoding());
+            }
+            else
+            { 
             File.WriteAllText(path, ConvertSubFromJson(GetWebSource(url)), new UTF8Encoding());
+            }
         }
 
         private static string ConvertSubFromJson(string jsonString)
@@ -86,6 +148,23 @@ namespace BBDown
             JObject json = JObject.Parse(jsonString);
             JArray sub = JArray.Parse(json["body"].ToString());
             for(int i = 0; i < sub.Count; i++)
+            {
+                lines.AppendLine((i + 1).ToString());
+                lines.AppendLine($"{FormatTime(sub[i]["from"].ToString())} --> {FormatTime(sub[i]["to"].ToString())}");
+                lines.AppendLine(sub[i]["content"].ToString());
+                lines.AppendLine();
+            }
+            return lines.ToString();
+        }
+
+        private static string ConvertSubFromJsonconvert(string jsonString)
+        {
+            var converter = new OpenChineseConverter();
+            string jsonString2 = converter.ToTaiwanFromSimplifiedWithPhrases(jsonString);
+            StringBuilder lines = new StringBuilder();
+            JObject json = JObject.Parse(jsonString2);
+            JArray sub = JArray.Parse(json["body"].ToString());
+            for (int i = 0; i < sub.Count; i++)
             {
                 lines.AppendLine((i + 1).ToString());
                 lines.AppendLine($"{FormatTime(sub[i]["from"].ToString())} --> {FormatTime(sub[i]["to"].ToString())}");
@@ -111,8 +190,8 @@ namespace BBDown
         public static Dictionary<string, string> SubDescDic = new Dictionary<string, string>
         {
             {"ar", "العربية"}, {"ar-eg", "العربية"},
-            {"bg", "български"}, {"cmn-hans", "国语 (简体)"},
-            {"cmn-hant", "國語 (繁體)"}, {"cs", "čeština"},
+            {"bg", "български"}, {"cmn-hans", "簡體 (國語)"},
+            {"cmn-hant", "繁體 (國語)"}, {"cs", "čeština"},
             {"da", "Dansk"}, {"da-dk", "Dansk"},
             {"de", "Deutsch"}, {"de-de", "Deutsch"},
             {"el", "Ελληνικά"}, {"en", "English"},
@@ -142,22 +221,23 @@ namespace BBDown
             {"tl", "Tagalog"}, {"tr", "Türkçe"},
             {"tr-tr", "Türkçe"}, {"uk", "Українська"},
             {"vi", "Tiếng Việt"}, {"zxx", "zxx"},
-            {"zh-hans", "中文（简体）"},
-            {"zh-Hans", "中文（简体）"},
-            {"zh-CN", "中文（简体）"},
-            {"zh-TW", "中文（繁體）"},
-            {"zh-HK", "中文（繁體）"},
-            {"zh-MO", "中文（繁體）"},
-            {"zh-Hant", "中文（繁體）"},
-            {"zh-hant", "中文（繁體）"},
-            {"yue", "中文（粤语）"},
+            {"zh-hans", "簡體（中文）"},
+            {"zh-Hans", "簡體（中文）"},
+            {"zh-CN", "簡體（中文）"},
+            {"zh-TW", "繁體（中文）"},
+            {"zh-HK", "繁體（中文）"},
+            {"zh-MO", "繁體（中文）"},
+            {"zh-Hant", "繁體（中文）"},
+            {"zh-hant", "繁體（中文）"},
+            {"yue", "粵語（中文）"},
             {"hu", "Magyar"},
             {"et", "Eestlane"}, {"bn", "বাংলা ভাষার"},
             {"iw", "שפה עברית"}, {"sr", "српски језик"},
             {"hy", "հայերեն"}, {"az", "Azərbaycan"},
             {"kk", "Қазақ тілі"}, {"is", "icelandic"},
             {"fil", "Pilipino"}, {"ku", "Kurdî"},
-            {"ca", "català"}, {"no", "norsk språk"}
+            {"ca", "català"}, {"no", "norsk språk"},
+            {"chs-cht", "簡轉繁"}
         };
 
         public static Dictionary<string, string> SubLangDic = new Dictionary<string, string> 
@@ -205,7 +285,60 @@ namespace BBDown
             {"kk", "kaz"}, {"is", "ice"},
             {"fil", "phi"}, {"ku", "kur"},
             {"ca", "cat"}, {"no", "nor"},
-            {"hu", "hun"}
+            {"hu", "hun"},{"chs-cht", "chi"}
+        };
+
+        public static Dictionary<string, string> SubTitleDic = new Dictionary<string, string>
+        {
+            {"ar", "العربية"}, {"ar-eg", "العربية"},
+            {"bg", "български"}, {"cmn-hans", "簡體 (國語)"},
+            {"cmn-hant", "繁體 (國語)"}, {"cs", "čeština"},
+            {"da", "Dansk"}, {"da-dk", "Dansk"},
+            {"de", "Deutsch"}, {"de-de", "Deutsch"},
+            {"el", "Ελληνικά"}, {"en", "English"},
+            {"en-US", "English"}, {"es", "Español (Latinoamérica)"},
+            {"es-419", "Español (Latinoamérica)"}, {"es-es", "Español (España)"},
+            {"es-ES", "Español (España)"}, {"fi", "Suomi"},
+            {"fi-fi", "Suomi"}, {"fr", "Français"},
+            {"fr-fr", "Français"}, {"he", "עברית"},
+            {"he-il", "עברית"}, {"hi", "हिन्दी"},
+            {"hi-in", "हिन्दी"}, {"hr", "Hrvatska"},
+            {"id", "Indonesia"}, {"id-id", "Indonesia"},
+            {"it", "Italiano"}, {"it-it", "Italiano"},
+            {"ja", "日本語"}, {"ja-ja", "日本語"},
+            {"jp", "日本語"}, {"jp-jp", "日本語"},
+            {"ko", "한국어"}, {"ko-kr", "한국어"},
+            {"ms", "Melayu"}, {"nb", "Norsk Bokmål"},
+            {"nb-no", "Norsk Bokmål"}, {"nl", "Nederlands"},
+            {"nl-BE", "Nederlands"}, {"nl-be", "Nederlands"},
+            {"nl-nl", "Nederlands"}, {"nob", "norsk"},
+            {"pl", "Polski"}, {"pl-pl", "Polski"},
+            {"pt", "Português"}, {"pt-BR", "Português"},
+            {"pt-br", "Português"}, {"ro", "Română"},
+            {"ru", "Русский"}, {"ru-ru", "Русский"},
+            {"sk", "slovenský"}, {"sv", "Svenska"},
+            {"sv-se", "Svenska"}, {"ta-in", "தமிழ்"},
+            {"te-in", "తెలుగు"}, {"th", "ไทย"},
+            {"tl", "Tagalog"}, {"tr", "Türkçe"},
+            {"tr-tr", "Türkçe"}, {"uk", "Українська"},
+            {"vi", "Tiếng Việt"}, {"zxx", "zxx"},
+            {"zh-hans", "中文（簡體)"},
+            {"zh-Hans", "中文（簡體)"},
+            {"zh-CN", "中文（簡體)"},
+            {"zh-TW", "中文（繁體)"},
+            {"zh-HK", "中文（繁體)"},
+            {"zh-MO", "中文（繁體)"},
+            {"zh-Hant", "中文（繁體)"},
+            {"zh-hant", "中文（繁體)"},
+            {"yue", "中文（粵語)"},
+            {"hu", "Magyar"},
+            {"et", "Eestlane"}, {"bn", "বাংলা ভাষার"},
+            {"iw", "שפה עברית"}, {"sr", "српски језик"},
+            {"hy", "հայերեն"}, {"az", "Azərbaycan"},
+            {"kk", "Қазақ тілі"}, {"is", "icelandic"},
+            {"fil", "Pilipino"}, {"ku", "Kurdî"},
+            {"ca", "català"}, {"no", "norsk språk"},
+            {"chs-cht", "中文 (簡轉繁)"}
         };
     }
 }
