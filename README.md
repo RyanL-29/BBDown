@@ -1,7 +1,9 @@
-[![img](https://img.shields.io/github/stars/nilaoda/BBDown?label=%E7%82%B9%E8%B5%9E)](https://github.com/nilaoda/BBDown)  [![img](https://img.shields.io/github/last-commit/nilaoda/BBDown?label=%E6%9C%80%E8%BF%91%E6%8F%90%E4%BA%A4)](https://github.com/nilaoda/BBDown)  [![img](https://img.shields.io/github/release/nilaoda/BBDown?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC)](https://github.com/nilaoda/BBDown/releases)  [![img](https://img.shields.io/github/license/nilaoda/BBDown?label=%E8%AE%B8%E5%8F%AF%E8%AF%81)](https://github.com/nilaoda/BBDown)
+[![img](https://img.shields.io/github/stars/RyanL-29/BBDown?label=%E7%82%B9%E8%B5%9E)](https://github.com/RyanL-29/BBDown)  [![img](https://img.shields.io/github/last-commit/RyanL-29/BBDown?label=%E6%9C%80%E8%BF%91%E6%8F%90%E4%BA%A4)](https://github.com/RyanL-29/BBDown)  [![img](https://img.shields.io/github/release/RyanL-29/BBDown?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC)](https://github.com/RyanL-29/BBDown/releases)  [![img](https://img.shields.io/github/license/RyanL-29/BBDown?label=%E8%AE%B8%E5%8F%AF%E8%AF%81)](https://github.com/RyanL-29/BBDown)
 
-# BBDown
-一款命令行式哔哩哔哩下载器. Bilibili Downloader.
+# BBDown Server Edition
+BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟件. 24/7 version
+
+此版本適用於伺服器及NAS上面使用, 可以全自動運行
 
 # 下载
 https://github.com/nilaoda/BBDown/releases
@@ -10,34 +12,42 @@ https://github.com/nilaoda/BBDown/releases
 目前命令行参数支持情况
 ```
 BBDown:
-  BBDown是一个免费且便捷高效的哔哩哔哩下载/解析软件.
+  BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟件.
 
 Usage:
   BBDown [options] <url> [command]
 
 Arguments:
-  <url>    视频地址 或 av|bv|BV|ep|ss
+  <url>    影片地址 或 av|bv|BV|ep|ss
 
 Options:
   -tv, --use-tv-api                    使用TV端解析模式
-  -hevc, --only-hevc                   下载hevc编码
-  -info, --only-show-info              仅解析不下载
-  -hs, --hide-streams                  不要显示所有可用音视频流
-  -ia, --interactive                   交互式选择清晰度
-  -mt, --multi-thread                  使用多线程下载
-  -p, --select-page <select-page>      选择指定分p或分p范围
-  -c, --cookie <cookie>                设置字符串cookie用以下载网页接口的会员内容
-  -a, --access-token <access-token>    设置access_token用以下载TV接口的会员内容
+  -intl, --use-intl-api                使用國際版解析模式
+  -hevc, --only-hevc                   下載hevc編碼
+  -info, --only-show-info              只解析不下載
+  -hs, --hide-streams                  不要顯示所有可用音視頻流
+  -ia, --interactive                   交互式選擇清晰度
+  --show-all                           展示所有分P資訊
+  --use-aria2c                        使用aria2c下載(你需要自行準備二進制可執行文件)
+  -mt, --multi-thread                  使用多線程下載
+  -p, --select-page <select-page>      選擇指定分p或分p範圍
+  --audio-only                         只下載音訊
+  --video-only                          只下載視訊
+  --debug                              輸出調試日誌
+  --skip-mux                           跳過混流步驟
+  --language <language>                設置混流的音頻語言(代碼)，如chi, jpn等
+  -a, --access-token <access-token>    設置access_token用以下載TV接口的會員內容
   --version                            Show version information
   -?, -h, --help                       Show help and usage information
 
 Commands:
-  login      通过APP扫描二维码以登录您的WEB账号
-  logintv    通过APP扫描二维码以登录您的TV账号
+  login      通過APP掃描二維碼以登錄您的WEB賬號
+  logintv    通過APP掃描二維碼以登錄您的TV賬號
 ```
 
 # 功能
 - [x] 番剧下载(Web|TV)
+- [x] 课程下载(Web)
 - [x] 普通内容下载(Web|TV) `(TV接口可以下载部分UP主的无水印内容)`
 - [x] 多分P自动下载
 - [x] 选择指定分P进行下载
@@ -46,123 +56,121 @@ Commands:
 - [x] 自动合并音频+视频流+字幕流
 - [x] 二维码登录账号
 - [x] **多线程下载**
+- [x] 支持调用aria2c下载
+- [x] 支持至高4K HDR清晰度下载
+- [x] 可自行設定檢查更新間隔時間
+- [x] 可自行設定影片下載目錄
+- [x] 可自行設定下載檔名前綴後綴
+- [x] 自動增加簡轉繁字幕 (編譯需要自行下載 OpenCC)
+- [x] 解像度將會自動加上至檔名
+- [x] 全自動執行(暫時透過 batch script 來實現)
+- [x] 可以批量下載
+
+#改善
+- [x] 除了影片分片外快取資料夾不會被剷除
+- [x] 解決字幕重複下載問題
+- [x] 解決快取資料夾被剷除後再次下載問題
+- [x] 所有快取資料夾都會被放在 temp 裏面
 
 # TODO
 - [ ] 支持更多自定义选项
 - [ ] 自动刷新cookie
+- [ ] 跟著主線更新
+- [ ] 實現整段命令行參數在Config.json設置
+- [ ] 真正全自動執行
 
-# 更新日志
-<details>
-<summary>点击查看详情</summary>
+# 使用示例
 
-* 2020年10月3日 0:18  
-  修正字幕获取逻辑(同一avid不同cid)  
-  增强的字幕获取接口  
+扫码登录网页账号：
+```
+BBDown login
+```
+扫码登录云视听小电视账号：
+```
+BBDown logintv
+```
+ 
+*PS: 如果登录报错`The type initializer for 'Gdip' threw an exception`，请参考 [#37](https://github.com/nilaoda/BBDown/issues/37) 解决*
 
-* 2020年10月1日 14:16  
-  支持番剧全集解析  
-  优化下载流程  
+手动加载云视听小电视token：
+```
+BBDown -a "access_token=******" "https://www.bilibili.com/video/BV1qt4y1X7TW"
+```
+下载普通视频：
+```
+BBDown "https://www.bilibili.com/video/BV1qt4y1X7TW"
+```
+使用TV接口下载(粉丝量大的UP主基本上是无水印片源)：
+```
+BBDown -tv "https://www.bilibili.com/video/BV1qt4y1X7TW"
+```
+当分P过多时，默认会隐藏展示全部的分P信息，你可以使用如下命令来显示所有每一个分P。
+```
+BBDown --show-all "https://www.bilibili.com/video/BV1At41167aj"
+```
+选择下载某些分P的三种情况：
+* 单个分P：10
+```
+BBDown "https://www.bilibili.com/video/BV1At41167aj?p=10"
+```
+```
+BBDown -p 10 "https://www.bilibili.com/video/BV1At41167aj"
+```
+* 多个分P：1,2,10
+```
+BBDown -p 1,2,10 "https://www.bilibili.com/video/BV1At41167aj"
+```
+* 范围分P：1-10
+```
+BBDown -p 1-10 "https://www.bilibili.com/video/BV1At41167aj"
+```
+下载番剧全集：
+```
+BBDown -p ALL "https://www.bilibili.com/bangumi/play/ss33073"
+```
 
-* 2020年9月29日 22:51  
-  支持下载课程内容  
-  支持下载HDR10内容  
-  修复特殊字符无法合并问题  
-  修复自定义分P后删除临时文件夹时遗漏封面图片的问题  
-  优化视频信息获取逻辑  
-  多分P现在会存放在同一个文件夹下  
-	
-* 2020年9月13日 17:03  
-  修复部分番剧视频分P重复问题  
-  增加--debug选项  
-  细节优化  
+------------
 
-* 2020年8月25日 22:36  
-  修复免二压视频无法获取最高清晰度的问题  
-  
-* 2020年8月19日 21:18  
-  修复1.2.1中TV模式下没有获取到可用最高清晰度的问题  
-  
-* 2020年8月18日 21:19  
-  SSL处理  
-  修正视频发布时间时区问题  
-  info模式显示视频URL  
-  增加TV模式下的清晰度选择  
-  其他优化 
-  
-* 2020年8月17日 22:46  
-  修复`-hs`和`-info`逻辑问题  
-  重写多线程下载实现,提高稳定性  
-  
-* 2020年8月16日 20:20  
-  支持FLV分段下载合并  
-  
-* 2020年8月16日 0:04  
-  支持TV版番剧下载  
-  支持TV二维码登录  
-  
-* 2020年8月10日 20:19  
-  修复严重BUG  
-  
-* 2020年8月9日 0:16  
-  支持FLV资源下载  
-  
-* 2020年7月31日 23:35  
-  修复不二压视频只显示一个清晰度的问题  
-  鉴于部分视频没有返回正确的字典，程序从此开始采用本地化DIC  
-  支持下载无音频的稿件  
-  其他优化  
-  
-* 2020年7月31日 19:07  
-  修复无法加载cookie的问题  
-  
-* 2020年7月31日 0:02  
-  增加二维码登录并支持本地存储cookie
 
-* 2020年7月30日 10:40  
-  修复不删除空文件夹的问题  
-  对cmcc的cdn禁用多线程下载  
-  
-* 2020年7月30日 8:04  
-  多线程优化进度反馈  
-  多线程缩短超时时间  
-  多线程最高8线程
-  
-* 2020年7月29日 21:32  
-  修正`-info`的逻辑  
-  修复某些电影无法下载的问题  
-  临时文件存放至单独文件夹  
-  增加多线程下载逻辑  
-  
-* 2020年7月28日 13:50  
-  继续优化最高清晰度的自动选择逻辑  
-  成为标准化的命令行程序  
-  支持bv小写链接  
-  支持ss链接解析  
-  
-* 2020年7月27日 22:49  
-  优化最高清晰度寻找算法  
-  支持选择分P下载  
-  加入`-help`命令
-  
-* 2020年7月27日 20:29  
-  更改解析接口，修复有时候获取不到分辨率编码等问题  
-  修复分P下载异常问题  
-  开始显示所有流信息
-  
-* 2020年7月27日 0:15  
-  修复部分番剧无法下载问题
-  
-* 2020年7月26日 23:33  
-  支持字幕自动封装
-  
-* 2020年7月26日 19:50  
-  发布公测
+## **bilibilidown.bat 是主要執行檔, 設置好再按他就可以執行, 如非必要請勿更改檔名, 更改後不作任何設置100%不能用**
 
-</details>
+#Config.json 設置
+
+```
+{
+ "dir": "C:/Users/Ryan/Desktop/test",  #影片檔案存放位置
+ "prefix": "[Test]", #檔名前綴
+ "suffix": "[Bilibili][test]" #檔名後綴
+}
+```
+#cookie.txt
+```
+SESSDATA=xxxxxx%xxxxxxxxx%xxxxxxx%xxxx
+#BBDown.exe login 命令行取得的cookie
+```
+#更新間隔時間設置 (bilibilidown.bat)
+```
+@echo off
+
+:loop
+
+call config.bat
+pause
+timeout /T 300 /NOBREAK > nul  #300是停止秒數 = 5 分鐘執行一次
+
+goto loop
+```
+#自動更新及批量下載設置(config.bat)
+```
+  REM 五等分的新娘∬
+  BBDown.exe -mt -p 8 https://www.bilibili.com/bangumi/play/ss37808
+
+  #參數基本上和主線的那個一樣, 只是不需要在這裏設置cookie
+```
 
 # 演示
-![1](https://user-images.githubusercontent.com/20772925/88686407-a2001480-d129-11ea-8aac-97a0c71af115.gif)
+![1](https://raw.githubusercontent.com/RyanL-29/BBDown/master/ScreenShot/2021-03-05%2021-13-40.gif)
 
-下载完毕后在当前目录查看MP4文件：
+下载完毕后在上面你自訂的的目录查看MP4文件：
 
-![2](https://user-images.githubusercontent.com/20772925/88478901-5e1cdc00-cf7e-11ea-97c1-154b9226564e.png)
+![2](https://raw.githubusercontent.com/RyanL-29/BBDown/master/ScreenShot/Screenshot%202021-03-05%20211752.png)
