@@ -4,6 +4,7 @@
 BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟體. 24/7 version
 
 此版本適用於伺服器及NAS上面使用, 可以全自動運行
+測試環境為 Windows Server 2019
 
 # 下載
 https://github.com/nilaoda/BBDown/releases
