@@ -133,6 +133,10 @@ BBDown -p 1-10 "https://www.bilibili.com/video/BV1At41167aj"
 ```
 BBDown -p ALL "https://www.bilibili.com/bangumi/play/ss33073"
 ```
+下載番劇最新一集：
+```
+BBDown -p LATEST "https://www.bilibili.com/bangumi/play/ss33073"
+```
 
 ------------
 
