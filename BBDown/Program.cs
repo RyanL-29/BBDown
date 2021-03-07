@@ -351,7 +351,7 @@ namespace BBDown
                 aidOri = await GetAvIdAsync(input);
                 Log("獲取aid結束: " + aidOri);
                 //-p的优先级大于URL中的自带p参数，所以先清空selectedPages
-                if (!string.IsNullOrEmpty(selectPage) && selectPage != "ALL") 
+                if (!string.IsNullOrEmpty(selectPage) && selectPage != "ALL" && selectPage != "LATEST") 
                 {
                     selectedPages = new List<string>();
                     try
@@ -420,14 +420,19 @@ namespace BBDown
                         LogDebug($"P{p.index}: [{p.cid}] [{p.title}] [{FormatTime(p.dur)}]");
                     }
                 }
-
+                if (selectPage == "LATEST")
+                {
+                    selectedPages = new List<string>();
+                    selectedPages.Add(pagesInfo.Count.ToString());
+                    LogDebug(pagesInfo.Count.ToString());
+                }
                 //如果用户没有选择分P，根据epid来确定某一集
-                if (selectedPages == null && selectPage != "ALL" && !string.IsNullOrEmpty(vInfo.Index))
+                if (selectedPages == null && selectPage != "ALL" && !string.IsNullOrEmpty(vInfo.Index) && selectPage != "LATEST")
                 {
                     selectedPages = new List<string> { vInfo.Index };
-                    Log("程序已自動選擇你輸入的集數，如果要下載其他集數請自行指定分P(可使用參數-p ALL代表全部)");
+                    Log("程序已自動選擇你輸入的集數，如果要下載其他集數請自行指定分P(可使用參數-p ALL代表全部 -p LATEST代表最新一集)");
                 }
-
+                
                 Log($"共計 {pagesInfo.Count} 個分P, 已選擇：" + (selectedPages == null ? "ALL" : string.Join(",", selectedPages)));
 
                 //过滤不需要的分P
