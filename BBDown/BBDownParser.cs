@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using static BBDown.BBDownUtil;
@@ -45,6 +46,12 @@ namespace BBDown
             //以下情况从网页源代码尝试解析
             if (webJson.Contains("\"大会员专享限制\""))
             {
+                string cookiePath = Directory.GetCurrentDirectory();
+                if (File.Exists($"cookie.txt"))
+                {
+                    File.Delete($"{cookiePath}/cookie.txt");
+                    File.Create($"{cookiePath}/invalid_cookie.txt");
+                }
                 return webJson;
             }
             return webJson;

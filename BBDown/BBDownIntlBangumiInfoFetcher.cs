@@ -14,48 +14,43 @@ namespace BBDown
         {
             id = id.Substring(3);
             string index = "";
-            string api = $"https://api.global.bilibili.com/intl/gateway/ogv/m/view?ep_id={id}&s_locale=ja_JP";
+            //string api = $"https://api.global.bilibili.com/intl/gateway/ogv/m/view?ep_id={id}&s_locale=ja_JP";
+            string api = $"https://api.global.bilibili.com/intl/gateway/v2/ogv/view/app/season?ep_id={id}&s_locale=zh_SG";
             string json = GetWebSource(api);
             JObject infoJson = JObject.Parse(json);
-            string seasonId = infoJson["data"]["season_id"].ToString();
-            string cover = infoJson["data"]["refine_cover"].ToString();
-            string title = infoJson["data"]["title"].ToString();
-            string desc = infoJson["data"]["evaluate"].ToString();
+            string seasonId = infoJson["result"]["season_id"].ToString();
+            string cover = infoJson["result"]["cover"].ToString();
+            string title = infoJson["result"]["title"].ToString();
+            string desc = infoJson["result"]["evaluate"].ToString();
 
 
-            string animeUrl = $"https://bangumi.bilibili.com/anime/{seasonId}";
-            var web = GetWebSource(animeUrl);
-            if (web != "")
+            if (cover == "")
             {
-                Regex regex = new Regex("window.__INITIAL_STATE__=([\\s\\S].*?);\\(function\\(\\)");
-                string _json = regex.Match(web).Groups[1].Value;
-                cover = JObject.Parse(_json)["mediaInfo"]["cover"].ToString();
-                title = JObject.Parse(_json)["mediaInfo"]["title"].ToString();
-                desc = JObject.Parse(_json)["mediaInfo"]["evaluate"].ToString();
+                string animeUrl = $"https://bangumi.bilibili.com/anime/{seasonId}";
+                var web = GetWebSource(animeUrl);
+                if (web != "")
+                {
+                    Regex regex = new Regex("window.__INITIAL_STATE__=([\\s\\S].*?);\\(function\\(\\)");
+                    string _json = regex.Match(web).Groups[1].Value;
+                    cover = JObject.Parse(_json)["mediaInfo"]["cover"].ToString();
+                    title = JObject.Parse(_json)["mediaInfo"]["title"].ToString();
+                    desc = JObject.Parse(_json)["mediaInfo"]["evaluate"].ToString();
+                }
             }
 
-            string pubTime = infoJson["data"]["publish"]["pub_time"].ToString();
-            JArray pages = infoJson["data"]["episodes"].ToString() != "" ? JArray.Parse(infoJson["data"]["episodes"].ToString()) : new JArray();
+            string pubTime = infoJson["result"]["publish"]["pub_time"].ToString();
+            JArray pages = infoJson["result"]["episodes"].ToString() != "" ? JArray.Parse(infoJson["result"]["episodes"].ToString()) : new JArray();
             List<Page> pagesInfo = new List<Page>();
             int i = 1;
 
-            if (pages.Count == 0)
+            if (infoJson["result"]["modules"] != null)
             {
-                if (web != "")
+                foreach (JObject section in JArray.Parse(infoJson["result"]["modules"].ToString()))
                 {
-                    string epApi = $"https://api.bilibili.com/pgc/web/season/section?season_id={seasonId}";
-                    var _web = GetWebSource(epApi);
-                    pages = JArray.Parse(JObject.Parse(_web)["result"]["main_section"]["episodes"].ToString());
-                }
-                else if (infoJson["data"]["modules"] != null)
-                {
-                    foreach (JObject section in JArray.Parse(infoJson["data"]["modules"].ToString()))
+                    if (section.ToString().Contains($"/{id}"))
                     {
-                        if (section.ToString().Contains($"ep_id={id}"))
-                        {
-                            pages = JArray.Parse(section["data"]["episodes"].ToString());
-                            break;
-                        }
+                        pages = JArray.Parse(section["data"]["episodes"].ToString());
+                        break;
                     }
                 }
             }
