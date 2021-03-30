@@ -173,11 +173,10 @@ namespace BBDown
                 string jsonpath = Directory.GetCurrentDirectory();
                 string jsonfile = File.ReadAllText($"{jsonpath}/config.json");
                 dynamic configjson = JValue.Parse(jsonfile);
-                string UA = configjson.UserAgent;
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
                 webRequest.Method = "GET";
-                webRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36";
-                webRequest.Headers.Add("Accept-Encoding", "gzip, deflate, br");
+                webRequest.UserAgent = configjson.UserAgent;
+                webRequest.Headers.Add("Accept-Encoding", "gzip, deflate");
                 webRequest.Headers.Add("Cookie", (url.Contains("/ep") || url.Contains("/ss")) ? Program.COOKIE + ";CURRENT_FNVAL=80;" : Program.COOKIE);
                 if (url.Contains("api.bilibili.com/pgc/player/web/playurl") || url.Contains("api.bilibili.com/pugv/player/web/playurl"))
                     webRequest.Headers.Add("Referer", "https://www.bilibili.com");
