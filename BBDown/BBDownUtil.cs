@@ -169,9 +169,13 @@ namespace BBDown
             string htmlCode = string.Empty;
             try
             {
+                //讀取JSON存放
+                string jsonpath = Directory.GetCurrentDirectory();
+                string jsonfile = File.ReadAllText($"{jsonpath}/config.json");
+                dynamic json = JValue.Parse(jsonfile);
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
                 webRequest.Method = "GET";
-                webRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36";
+                webRequest.UserAgent = json.UserAgent;
                 webRequest.Headers.Add("Accept-Encoding", "gzip, deflate, br");
                 webRequest.Headers.Add("Cookie", (url.Contains("/ep") || url.Contains("/ss")) ? Program.COOKIE + ";CURRENT_FNVAL=80;" : Program.COOKIE);
                 if (url.Contains("api.bilibili.com/pgc/player/web/playurl") || url.Contains("api.bilibili.com/pugv/player/web/playurl"))
@@ -219,7 +223,9 @@ namespace BBDown
             }
             catch (Exception)
             {
+                ;
             }
+            LogDebug("Response: {0}", htmlCode);
             return htmlCode;
         }
 
@@ -411,60 +417,6 @@ namespace BBDown
                         progress.Report((double)done / fileSize);
                     }
                 });
-                /*//多线程设置
-                ParallelOptions parallelOptions = new ParallelOptions
-                {
-                    MaxDegreeOfParallelism = 8
-                };
-                Parallel.ForEach(allClips, parallelOptions, async clip =>
-                {
-                    string tmp = Path.Combine(Path.GetDirectoryName(path), clip.index.ToString("00000") + "_" + Path.GetFileNameWithoutExtension(path) + (Path.GetExtension(path).EndsWith(".mp4") ? ".vclip" : ".aclip"));
-                    if (!(File.Exists(tmp) && new FileInfo(tmp).Length == clip.to - clip.from + 1))
-                    {
-                    reDown:
-                        try
-                        {
-                            *//*HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
-                            request.Timeout = 30000;
-                            request.ReadWriteTimeout = 30000; //重要
-                            request.AllowAutoRedirect = true;
-                            request.KeepAlive = false;
-                            request.Method = "GET";
-                            if (!url.Contains("platform=android_tv_yst"))
-                                request.Referer = "https://www.bilibili.com";
-                            request.UserAgent = "Mozilla/5.0";
-                            request.Headers.Add("Cookie", Program.COOKIE);
-                            if (clip.to != -1)
-                                request.AddRange("bytes", clip.from, clip.to);
-                            else
-                                request.AddRange("bytes", clip.from);
-                            using (var response = (HttpWebResponse)request.GetResponse())
-                            {
-                                using (var responseStream = response.GetResponseStream())
-                                {
-                                    using (var stream = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.Write))
-                                    {
-                                        byte[] bArr = new byte[1024];
-                                        int size = responseStream.Read(bArr, 0, (int)bArr.Length);
-                                        while (size > 0)
-                                        {
-                                            stream.Write(bArr, 0, size);
-                                            done += size;
-                                            progress.Report((double)done / fileSize);
-                                            size = responseStream.Read(bArr, 0, (int)bArr.Length);
-                                        }
-                                    }
-                                }
-                            }*//*
-                        }
-                        catch { goto reDown; }
-                    }
-                    else
-                    {
-                        done += new FileInfo(tmp).Length;
-                        progress.Report((double)done / fileSize);
-                    }
-                });*/
             }
         }
 
