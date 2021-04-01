@@ -32,7 +32,7 @@ namespace BBDown
                 string latestVer = redirctUrl.Replace("https://github.com/RyanL-29/BBDown/releases/tag/", "");
                 if (nowVer != latestVer && !latestVer.StartsWith("https"))
                 {
-                    Console.Title = $"BBDown Server Eidtion 新版本已推出：{latestVer}";
+                    Console.Title = $"BBDown Server Edition 新版本已推出：{latestVer}";
                 }
             }
             catch (Exception)
