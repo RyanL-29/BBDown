@@ -149,7 +149,8 @@ BBDown -p LATEST "https://www.bilibili.com/bangumi/play/ss33073"
 {
  "dir": "C:/Users/Ryan/Desktop/test",  #影片檔案存放位置
  "prefix": "[Test]", #檔名前綴
- "suffix": "[Bilibili][test]" #檔名後綴
+ "suffix": "[Bilibili][test]", #檔名後綴
+ "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36" #User-Agent
 }
 ```
 #cookie.txt
