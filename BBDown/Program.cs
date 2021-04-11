@@ -207,6 +207,12 @@ namespace BBDown
                             if (!File.Exists($"cookie.txt"))
                             {
                                 File.Create($"{cookiePath}/cookie.txt");
+                                int i = 0;
+                                while (!File.Exists($"cookie.txt") && i < 30)
+                                {
+                                    Thread.Sleep(200);
+                                    i++;
+                                }
                                 using (StreamWriter sw = new StreamWriter($"{cookiePath}/cookie.txt"))
                                 {
                                     sw.Write("SESSDATA=" + GetQueryString("SESSDATA", cc));
@@ -277,6 +283,12 @@ namespace BBDown
                             if (!File.Exists($"cookie.txt"))
                             {
                                 File.Create($"{cookiePath}/cookie.txt");
+                                int i = 0;
+                                while (!File.Exists($"cookie.txt") && i < 30)
+                                {
+                                    Thread.Sleep(200);
+                                    i++;
+                                }
                                 using (StreamWriter sw = new StreamWriter($"{cookiePath}/cookie.txt")) 
                                 {
                                     sw.Write("access_token=" + cc);
