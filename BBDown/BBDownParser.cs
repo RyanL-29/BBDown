@@ -239,7 +239,7 @@ namespace BBDown
                     }
                     else
                     {
-                        LogError("解析数据错误，未发现有用的信息");
+                        LogError("解析數據錯誤，未發現有用的信息");
                         LogDebug("{0}", webJsonStr);
                         return (webJsonStr, videoTracks, audioTracks, clips, dfns);
                     }

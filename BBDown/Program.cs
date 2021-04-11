@@ -201,8 +201,24 @@ namespace BBDown
                         else
                         {
                             string cc = JObject.Parse(w)["data"]["url"].ToString();
+                            string cookiePath = Directory.GetCurrentDirectory();
                             Log("登录成功: SESSDATA=" + GetQueryString("SESSDATA", cc));
                             //导出cookie
+                            if (!File.Exists($"cookie.txt"))
+                            {
+                                File.Create($"{cookiePath}/cookie.txt");
+                                using (StreamWriter sw = new StreamWriter($"{cookiePath}/cookie.txt"))
+                                {
+                                    sw.Write("SESSDATA=" + GetQueryString("SESSDATA", cc));
+                                }
+                            }
+                            else
+                            {
+                                using (StreamWriter sw = new StreamWriter($"{cookiePath}/cookie.txt"))
+                                {
+                                    sw.Write("SESSDATA=" + GetQueryString("SESSDATA", cc));
+                                }
+                            }
                             File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "BBDown.data"), "SESSDATA=" + GetQueryString("SESSDATA", cc));
                             File.Delete("qrcode.png");
                             break;
@@ -220,19 +236,19 @@ namespace BBDown
                     string loginUrl = "https://passport.snm0516.aisee.tv/x/passport-tv-login/qrcode/auth_code";
                     string pollUrl = "https://passport.bilibili.com/x/passport-tv-login/qrcode/poll";
                     var parms = GetTVLoginParms();
-                    Log("获取登录地址...");
+                    Log("獲取登錄地址...");
                     WebClient webClient = new WebClient();
                     byte[] responseArray = webClient.UploadValues(loginUrl, parms);
                     string web = Encoding.UTF8.GetString(responseArray);
                     string url = JObject.Parse(web)["data"]["url"].ToString();
                     string authCode = JObject.Parse(web)["data"]["auth_code"].ToString();
-                    Log("生成二维码...");
+                    Log("生成二維碼...");
                     QRCodeGenerator qrGenerator = new QRCodeGenerator();
                     QRCodeData qrCodeData = qrGenerator.CreateQrCode(url, QRCodeGenerator.ECCLevel.Q);
                     QRCode qrCode = new QRCode(qrCodeData);
                     Bitmap qrCodeImage = qrCode.GetGraphic(7);
                     qrCodeImage.Save("qrcode.png", System.Drawing.Imaging.ImageFormat.Png);
-                    Log("生成二维码成功：qrcode.png, 请打开并扫描");
+                    Log("生成二維碼成功：qrcode.png, 請打開並掃描");
                     parms.Set("auth_code", authCode);
                     parms.Set("ts", GetTimeStamp(true));
                     parms.Remove("sign");
@@ -245,7 +261,7 @@ namespace BBDown
                         string code = JObject.Parse(web)["code"].ToString();
                         if (code == "86038")
                         {
-                            LogColor("二维码已过期, 请重新执行登录指令.");
+                            LogColor("二維碼已過期, 請重新執行登錄指令.");
                             break;
                         }
                         else if (code == "86039") //等待扫码
@@ -255,8 +271,24 @@ namespace BBDown
                         else
                         {
                             string cc = JObject.Parse(web)["data"]["access_token"].ToString();
-                            Log("登录成功: AccessToken=" + cc);
+                            string cookiePath = Directory.GetCurrentDirectory();
+                            Log("登錄成功: AccessToken=" + cc);
                             //导出cookie
+                            if (!File.Exists($"cookie.txt"))
+                            {
+                                File.Create($"{cookiePath}/cookie.txt");
+                                using (StreamWriter sw = new StreamWriter($"{cookiePath}/cookie.txt")) 
+                                {
+                                    sw.Write("access_token=" + cc);
+                                }
+                            }
+                            else
+                            {
+                                using (StreamWriter sw = new StreamWriter($"{cookiePath}/cookie.txt"))    
+                                {
+                                    sw.Write("access_token=" + cc);
+                                }
+                            }
                             File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "BBDownTV.data"), "access_token=" + cc);
                             File.Delete("qrcode.png");
                             break;
@@ -509,12 +541,12 @@ namespace BBDown
                         if (webJsonStr.Contains("\"video\":[") && videoTracks.Count == 0)
 
                         {
-                            LogError("没有找到符合要求的视频流");
+                            LogError("沒有找到符合要求的視頻流");
                             if (!audioOnly) continue;
                         }
                         if (webJsonStr.Contains("\"audio\":[") && audioTracks.Count == 0)
                         {
-                            LogError("没有找到符合要求的音频流");
+                            LogError("沒有找到符合要求的音頻流");
                             if (!videoOnly) continue;
                         }
                         //降序
@@ -739,7 +771,7 @@ namespace BBDown
                         }
                         else
                         {
-                            if (webJsonStr.Contains("平台不可觀看"))
+                            if (webJsonStr.Contains("平台不可观看"))
                             {
                                 throw new Exception("當前(WEB)平台不可觀看，請嘗試使用TV API解析。");
                             }
@@ -751,7 +783,7 @@ namespace BBDown
                             {
                                 throw new Exception("大會員專享限制");
                             }
-                            else if (webJsonStr.Contains("地區不可觀看") || webJsonStr.Contains("地區不可觀看"))
+                            else if (webJsonStr.Contains("地区不可观看") || webJsonStr.Contains("地區不可觀看"))
                             {
                                 throw new Exception("當前地區不可觀看，請嘗試使用代理解析。");
                             }
