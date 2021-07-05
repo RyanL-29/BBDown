@@ -149,9 +149,11 @@ namespace BBDown
             JArray sub = JArray.Parse(json["body"].ToString());
             for(int i = 0; i < sub.Count; i++)
             {
+                JObject line = (JObject)sub[i];
                 lines.AppendLine((i + 1).ToString());
-                lines.AppendLine($"{FormatTime(sub[i]["from"].ToString())} --> {FormatTime(sub[i]["to"].ToString())}");
-                lines.AppendLine(sub[i]["content"].ToString());
+                lines.AppendLine($"{(line.ContainsKey("from") ? FormatTime(line["from"].ToString()) : "0")} --> {FormatTime(line["to"].ToString())}");
+                if (line.ContainsKey("content"))
+                    lines.AppendLine(line["content"].ToString());
                 lines.AppendLine();
             }
             return lines.ToString();
@@ -166,9 +168,11 @@ namespace BBDown
             JArray sub = JArray.Parse(json["body"].ToString());
             for (int i = 0; i < sub.Count; i++)
             {
+                JObject line = (JObject)sub[i];
                 lines.AppendLine((i + 1).ToString());
-                lines.AppendLine($"{FormatTime(sub[i]["from"].ToString())} --> {FormatTime(sub[i]["to"].ToString())}");
-                lines.AppendLine(sub[i]["content"].ToString());
+                lines.AppendLine($"{(line.ContainsKey("from") ? FormatTime(line["from"].ToString()) : "0")} --> {FormatTime(line["to"].ToString())}");
+                if (line.ContainsKey("content"))
+                    lines.AppendLine(line["content"].ToString());
                 lines.AppendLine();
             }
             return lines.ToString();
