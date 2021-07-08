@@ -88,13 +88,14 @@ namespace BBDown
             }
             var converter = new OpenChineseConverter();
             string titletcov = converter.ToTaiwanFromSimplifiedWithPhrases(title);
+            titletcov = titletcov.Remove(titletcov.IndexOf("（"));
             string desccov = converter.ToTaiwanFromSimplifiedWithPhrases(desc);
             //----分析完毕
             var arguments = $"-loglevel warning -y " +
                  inputArg.ToString() + metaArg.ToString() + $" -metadata title=\"" + titletcov + "\" " +
                  (lang == "" ? "" : $"-metadata:s:a:0 language={lang} ") +
                  $"-metadata description=\"{desccov}\" " +
-                 (episodeId == "" ? "" : $"-metadata album=\"{titletcov}\" ") +
+                 $"-metadata album=\"{titletcov}\" " +
                  (audioOnly ? " -vn " : "") + (videoOnly ? " -an " : "") +
                  $"-c copy " +
                  (subs != null ? " -c:s mov_text " : "") +
