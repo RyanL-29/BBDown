@@ -45,6 +45,7 @@ namespace BBDown
         {
             desc = EscapeString(desc);
             title = EscapeString(title);
+            episodeId = EscapeString(episodeId);
 
             if (outPath.Contains("/") && ! Directory.Exists(Path.GetDirectoryName(outPath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(outPath));

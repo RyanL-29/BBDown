@@ -34,6 +34,8 @@ namespace BBDown
             {"64","720P" }, {"48","720P" }, {"32","480P" }, {"16","360P" }
         };
 
+        public static string APP_DIR = Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
+
         private static int Compare(Video r1, Video r2)
         {
             return (Convert.ToInt32(r1.id) * 100000 + r1.bandwith) > (Convert.ToInt32(r2.id) * 100000 + r2.bandwith) ? -1 : 1;
@@ -202,7 +204,7 @@ namespace BBDown
                         {
                             string cc = JObject.Parse(w)["data"]["url"].ToString();
                             string cookiePath = Directory.GetCurrentDirectory();
-                            Log("登录成功: SESSDATA=" + GetQueryString("SESSDATA", cc));
+                            Log("登錄成功: SESSDATA=" + GetQueryString("SESSDATA", cc));
                             //导出cookie
                             if (!File.Exists($"cookie.txt"))
                             {
@@ -225,7 +227,7 @@ namespace BBDown
                                     sw.Write("SESSDATA=" + GetQueryString("SESSDATA", cc));
                                 }
                             }
-                            File.WriteAllText(Path.Combine(AppContext.BaseDirectory, "BBDown.data"), "SESSDATA=" + GetQueryString("SESSDATA", cc));
+                            File.WriteAllText(Path.Combine(APP_DIR, "BBDown.data"), "SESSDATA=" + GetQueryString("SESSDATA", cc));
                             File.Delete("qrcode.png");
                             break;
                         }
@@ -378,17 +380,17 @@ namespace BBDown
                 }
 
                 LogDebug("運行參數：{0}", myOption);
-                if (string.IsNullOrEmpty(COOKIE) && File.Exists(Path.Combine(AppContext.BaseDirectory, "BBDown.data")) && !tvApi)
+                if (string.IsNullOrEmpty(COOKIE) && File.Exists(Path.Combine(APP_DIR, "BBDown.data")) && !tvApi)
                 {
                     Log("加載本地cookie...");
-                    LogDebug("文件路徑：{0}", Path.Combine(AppContext.BaseDirectory, "BBDown.data"));
-                    COOKIE = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "BBDown.data"));
+                    LogDebug("文件路徑：{0}", Path.Combine(APP_DIR, "BBDown.data"));
+                    COOKIE = File.ReadAllText(Path.Combine(APP_DIR, "BBDown.data"));
                 }
-                if (string.IsNullOrEmpty(TOKEN) && File.Exists(Path.Combine(AppContext.BaseDirectory, "BBDownTV.data")) && tvApi)
+                if (string.IsNullOrEmpty(TOKEN) && File.Exists(Path.Combine(APP_DIR, "BBDownTV.data")) && tvApi)
                     {
                     Log("加載本地token...");
-                    LogDebug("文件路徑：{0}", Path.Combine(AppContext.BaseDirectory, "BBDownTV.data"));
-                    TOKEN = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "BBDownTV.data"));
+                    LogDebug("文件路徑：{0}", Path.Combine(APP_DIR, "BBDownTV.data"));
+                    TOKEN = File.ReadAllText(Path.Combine(APP_DIR, "BBDownTV.data"));
                     TOKEN = TOKEN.Replace("access_token=", "");
                 }
                 Log("獲取aid...");
@@ -691,6 +693,7 @@ namespace BBDown
                                 LogError("合併失敗"); continue;
                             }
                             Log("清理臨時文件...");
+                            Thread.Sleep(200);
                             if (videoTracks.Count > 0) File.Delete(videoPath);
                             if (audioTracks.Count > 0) File.Delete(audioPath);
                         }
@@ -779,6 +782,7 @@ namespace BBDown
                                 LogError("合併失敗"); continue;
                             }
                             Log("清理臨時文件...");
+                            Thread.Sleep(200);
                             if (videoTracks.Count != 0) File.Delete(videoPath);
                         }
                         else

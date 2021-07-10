@@ -3,13 +3,19 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <Version>0.0.6</Version>
+    <Version>0.0.7</Version>
     <Description>BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟件. 24/7 version</Description>
     <ApplicationIcon>aniiconw.ico</ApplicationIcon>
+    <StartupObject></StartupObject>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>BBDown</ToolCommandName>
+    <PackageOutputPath>./nupkg</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="12.0.3" />
+    <PackageReference Include="Microsoft.DotNet.ILCompiler" Version="1.0.0-alpha-*" />
+    <PackageReference Include="protobuf-net" Version="3.0.101" />
     <PackageReference Include="QRCoder" Version="1.4.1" />
     <PackageReference Include="SharpZipLib" Version="1.3.1" />
     <PackageReference Include="System.CommandLine" Version="2.0.0-beta1.20574.7" />
