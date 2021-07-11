@@ -29,7 +29,7 @@ namespace BBDown
         public static string TOKEN { get; set; } = "";
 
         public static Dictionary<string, string> qualitys = new Dictionary<string, string>() {
-            {"125","HDR" }, {"120","4K" }, {"116","1080P60" },
+            {"126","DolbyVision" }, {"125","HDR" }, {"120","4K" }, {"116","1080P60" },
             {"112","1080P" }, {"80","1080P" }, {"74","720P60" },
             {"64","720P" }, {"48","720P" }, {"32","480P" }, {"16","360P" }
         };
@@ -50,8 +50,11 @@ namespace BBDown
         {
             public string Url { get; set; }
             public bool UseTvApi { get; set; }
+            public bool UseAppApi { get; set; }
             public bool UseIntlApi { get; set; }
+            public bool UseMP4box { get; set; }
             public bool OnlyHevc { get; set; }
+            public bool OnlyAvc { get; set; }
             public bool OnlyShowInfo { get; set; }
             public bool ShowAll { get; set; }
             public bool UseAria2c { get; set; }
@@ -60,6 +63,8 @@ namespace BBDown
             public bool MultiThread { get; set; }
             public bool VideoOnly { get; set; }
             public bool AudioOnly { get; set; }
+            public bool SubOnly { get; set; }
+            public bool NoPaddingPageNum { get; set; }
             public bool Debug { get; set; }
             public bool SkipMux { get; set; }
             public string SelectPage { get; set; } = "";
@@ -69,8 +74,11 @@ namespace BBDown
             public override string ToString()
             {
                 return $"{{Input={Url}, {nameof(UseTvApi)}={UseTvApi.ToString()}, " +
+                    $"{nameof(UseAppApi)}={UseAppApi.ToString()}, " +
                     $"{nameof(UseIntlApi)}={UseIntlApi.ToString()}, " +
+                    $"{nameof(UseMP4box)}={UseMP4box.ToString()}, " +
                     $"{nameof(OnlyHevc)}={OnlyHevc.ToString()}, " +
+                    $"{nameof(OnlyAvc)}={OnlyAvc.ToString()}, " +
                     $"{nameof(OnlyShowInfo)}={OnlyShowInfo.ToString()}, " +
                     $"{nameof(Interactive)}={Interactive.ToString()}, " +
                     $"{nameof(HideStreams)}={HideStreams.ToString()}, " +
@@ -79,6 +87,8 @@ namespace BBDown
                     $"{nameof(MultiThread)}={MultiThread.ToString()}, " +
                     $"{nameof(VideoOnly)}={VideoOnly.ToString()}, " +
                     $"{nameof(AudioOnly)}={AudioOnly.ToString()}, " +
+                    $"{nameof(SubOnly)}={SubOnly.ToString()}, " +
+                    $"{nameof(NoPaddingPageNum)}={NoPaddingPageNum.ToString()}, " +
                     $"{nameof(Debug)}={Debug.ToString()}, " +
                     $"{nameof(SelectPage)}={SelectPage}, " +
                     $"{nameof(AccessToken)}={AccessToken}}}";
@@ -101,12 +111,21 @@ namespace BBDown
                 new Option<bool>(
                     new string[]{ "--use-tv-api" ,"-tv"},
                     "使用TV端解析模式"),
+               new Option<bool>(
+                    new string[]{ "--use-app-api" ,"-app"},
+                    "使用APP端解析模式"),
                 new Option<bool>(
 					new string[]{ "--use-intl-api" ,"-intl"},
                     "使用国际版解析模式"),
                 new Option<bool>(
+                    new string[]{ "--use-mp4box"},
+                    "使用MP4Box來混流"),
+                new Option<bool>(
                     new string[]{ "--only-hevc" ,"-hevc"},
                     "下載hevc編碼"),
+                new Option<bool>(
+                    new string[]{ "--only-avc" ,"-avc"},
+                    "只下載avc編碼"),
                 new Option<bool>(
                     new string[]{ "--only-show-info" ,"-info"},
                     "只解析不下載"),
@@ -130,10 +149,16 @@ namespace BBDown
                     "選擇指定分p或分p範圍"),
 				new Option<bool>(
                     new string[]{ "--audio-only"},
-                    "仅下载音频"),
+                    "僅下載音頻"),
                 new Option<bool>(
                     new string[]{ "--video-only"},
-                    "仅下载视频"),
+                    "僅下載視頻"),
+                new Option<bool>(
+                    new string[]{ "--sub-only"},
+                    "僅下載字幕"),
+                new Option<bool>(
+                    new string[]{ "--no-padding-page-num"},
+                    "不給分P序號補零"),
                 new Option<bool>(
                     new string[]{ "--debug"},
                     "輸出調試日誌"),
@@ -144,7 +169,7 @@ namespace BBDown
                     new string[]{ "--language"},
                     "設置混流的音頻語言(代碼)，如chi, jpn等"),
                 new Option<string>(
-                    new string[]{ "--access-token" ,"-a"},
+                    new string[]{ "--access-token" ,"-token"},
                     "設置access_token用以下載TV接口的會員內容")
             };
 
@@ -227,7 +252,7 @@ namespace BBDown
                                     sw.Write("SESSDATA=" + GetQueryString("SESSDATA", cc));
                                 }
                             }
-                            File.WriteAllText(Path.Combine(APP_DIR, "BBDown.data"), "SESSDATA=" + GetQueryString("SESSDATA", cc));
+                            File.WriteAllText(Path.Combine(APP_DIR, "BBDown.data"), cc.Substring(cc.IndexOf('?') + 1).Replace("&", ";"));
                             File.Delete("qrcode.png");
                             break;
                         }
@@ -348,12 +373,16 @@ namespace BBDown
                 bool interactMode = myOption.Interactive;
                 bool infoMode = myOption.OnlyShowInfo;
                 bool tvApi = myOption.UseTvApi;
-				bool intlApi = myOption.UseIntlApi;
-                bool hevc = myOption.OnlyHevc;
+                bool appApi = myOption.UseAppApi;
+                bool intlApi = myOption.UseIntlApi;
+                bool useMp4box = myOption.UseMP4box;
+                bool onlyHevc = myOption.OnlyHevc;
+                bool onlyAvc = myOption.OnlyAvc;
                 bool hideStreams = myOption.HideStreams;
                 bool multiThread = myOption.MultiThread;
                 bool audioOnly = myOption.AudioOnly;
                 bool videoOnly = myOption.VideoOnly;
+                bool subOnly = myOption.SubOnly;
                 bool skipMux = myOption.SkipMux;
                 bool showAll = myOption.ShowAll;
                 bool useAria2c = myOption.UseAria2c;
@@ -371,7 +400,14 @@ namespace BBDown
                     audioOnly = false;
                     videoOnly = false;
                 }
-                
+
+                //OnlyHevc和OnlyAvc同时开启则全部忽视
+                if (onlyAvc && onlyHevc)
+                {
+                    onlyAvc = false;
+                    onlyHevc = false;
+                }
+
                 List<string> selectedPages = null;
                 if (!string.IsNullOrEmpty(GetQueryString("p", input)))
                 {
@@ -391,6 +427,13 @@ namespace BBDown
                     Log("加載本地token...");
                     LogDebug("文件路徑：{0}", Path.Combine(APP_DIR, "BBDownTV.data"));
                     TOKEN = File.ReadAllText(Path.Combine(APP_DIR, "BBDownTV.data"));
+                    TOKEN = TOKEN.Replace("access_token=", "");
+                }
+                if (string.IsNullOrEmpty(TOKEN) && File.Exists(Path.Combine(AppContext.BaseDirectory, "BBDownApp.data")) && appApi)
+                {
+                    Log("加载本地token...");
+                    LogDebug("文件路径：{0}", Path.Combine(AppContext.BaseDirectory, "BBDownApp.data"));
+                    TOKEN = File.ReadAllText(Path.Combine(AppContext.BaseDirectory, "BBDownApp.data"));
                     TOKEN = TOKEN.Replace("access_token=", "");
                 }
                 Log("獲取aid...");
@@ -494,7 +537,7 @@ namespace BBDown
                         {
                             Directory.CreateDirectory($"temp/{p.aid}");
                         }
-                        if (!File.Exists($"temp/{p.aid}/{p.aid}.jpg"))
+                        if (!subOnly && !File.Exists($"temp/{p.aid}/{p.aid}.jpg"))
                         {
                             Log("下載封面...");
                             LogDebug("下載：{0}", pic);
@@ -517,7 +560,28 @@ namespace BBDown
                                 Log($"下載字幕 {s.lan} => {BBDownSubUtil.SubDescDic[s.lan]}...");
                                 LogDebug("下載：{0}", s.url);
                                 BBDownSubUtil.SaveSubtitle(s.url, s.path);
+                                if (subOnly && File.Exists(s.path) && File.ReadAllText(s.path) != "")
+                                {
+                                    string _indexStr = p.index.ToString("0".PadRight(pagesInfo.OrderByDescending(_p => _p.index).First().index.ToString().Length, '0'));
+                                    //处理文件夹以.结尾导致的异常情况
+                                    if (title.EndsWith(".")) title += "_fix";
+                                    string _outSubPath = GetValidFileName(title) + (pagesInfo.Count > 1 ? $"/[P{_indexStr}]{GetValidFileName(p.title)}" : (vInfo.PagesInfo.Count > 1 ? $"[P{_indexStr}]{GetValidFileName(p.title)}" : "")) + $"_{BBDownSubUtil.SubDescDic[s.lan]}.srt";
+                                    if (_outSubPath.Contains("/"))
+                                    {
+                                        if (!Directory.Exists(Path.GetDirectoryName(_outSubPath)))
+                                        {
+                                            Directory.CreateDirectory(Path.GetDirectoryName(_outSubPath));
+                                        }
+                                    }
+                                    File.Move(s.path, _outSubPath, true);
+                                }
                             }
+
+                             if (subOnly)
+                               {
+                                  if (Directory.Exists(p.aid) && Directory.GetFiles(p.aid).Length == 0) Directory.Delete(p.aid, true);
+                                  continue;
+                               }
                         }
 
                     }
@@ -526,7 +590,7 @@ namespace BBDown
                     List<Audio> audioTracks = new List<Audio>();
                     List<string> clips = new List<string>();
                     List<string> dfns = new List<string>();
-                    string indexStr = p.index.ToString("0".PadRight(pagesInfo.OrderByDescending(_p => _p.index).First().index.ToString().Length, '0'));
+                    string indexStr = myOption.NoPaddingPageNum ? p.index.ToString() : p.index.ToString("0".PadRight(pagesInfo.OrderByDescending(_p => _p.index).First().index.ToString().Length, '0'));
                     string videoPath = $"temp/{p.aid}/{p.aid}.P{indexStr}.{p.cid}.mp4";
                     string audioPath = $"temp/{p.aid}/{p.aid}.P{indexStr}.{p.cid}.m4a";
                     //处理文件夹以.结尾导致的异常情况															  
@@ -544,7 +608,7 @@ namespace BBDown
 
                     
                     //调用解析
-                    (webJsonStr, videoTracks, audioTracks, clips, dfns) = ExtractTracks(hevc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi);
+                    (webJsonStr, videoTracks, audioTracks, clips, dfns) = ExtractTracks(onlyHevc, onlyAvc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, appApi);
                     //File.WriteAllText($"debug.json", JObject.Parse(webJsonStr).ToString());
                     JObject respJson = JObject.Parse(webJsonStr);
                     string outPath = dirname + (pagesInfo.Count > 1 ? $"/{json.prefix}{title}[{ep}][0000P]{json.suffix}" +
@@ -639,7 +703,13 @@ namespace BBDown
                             {
                                 if (multiThread && !videoTracks[vIndex].baseUrl.Contains("-cmcc-"))
                                 {
-                                    Log($"開始多線程下載P{p.index}視頻...");
+
+                                    if (videoTracks[vIndex].dfn == qualitys["126"] && !useMp4box)
+                                    {
+                                        LogError($"检测到杜比视界清晰度,将强制使用mp4box混流...");
+                                        useMp4box = true;
+                                    }
+                                Log($"開始多線程下載P{p.index}視頻...");
                                     await MultiThreadDownloadFileAsync(videoTracks[vIndex].baseUrl, videoPath, useAria2c);
                                     Log("合併視頻分片...");
                                     CombineMultipleFilesIntoSingleFile(GetFiles(Path.GetDirectoryName(videoPath), ".vclip"), videoPath);
@@ -681,8 +751,8 @@ namespace BBDown
 
                             if (skipMux) continue;
                             Log("開始合併音視頻" + (subtitleInfo.Count > 0 ? "和字幕" : "") + "...");
-                            int code = MuxAV(videoPath, audioPath, outPath,
-                                desc,
+                            int code = MuxAV(useMp4box, videoPath, audioPath, outPath,
+                            desc,
                                 title,
                                 vInfo.PagesInfo.Count > 1 ? ($"P{indexStr}.{p.title}") : "",
                                 File.Exists($"temp/{p.aid}/{p.aid}.jpg") ? $"temp/{p.aid}/{p.aid}.jpg" : "",
@@ -714,7 +784,7 @@ namespace BBDown
                                 if (vIndex > dfns.Count || vIndex < 0) vIndex = 0;
                                 Console.ResetColor();
                                 //重新解析
-                                (webJsonStr, videoTracks, audioTracks, clips, dfns) = ExtractTracks(hevc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, dfns[vIndex]);
+                                (webJsonStr, videoTracks, audioTracks, clips, dfns) = ExtractTracks(onlyHevc, onlyAvc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, appApi, dfns[vIndex]);
                                 flag = true;
                                 videoTracks.Clear();
                                 goto reParse;
@@ -770,7 +840,7 @@ namespace BBDown
                             videoPath = $"temp/{p.aid}/{p.aid}.P{indexStr}.{p.cid}.mp4";
                             MergeFLV(files, videoPath);
                             Log("開始混流視頻" + (subtitleInfo.Count > 0 ? "和字幕" : "") + "...");
-                            int code = MuxAV(videoPath, "", outPath,
+                            int code = MuxAV(false, videoPath, "", outPath,
                                 desc,
                                 title,
                                 vInfo.PagesInfo.Count > 1 ? ($"P{indexStr}.{p.title}") : "",
