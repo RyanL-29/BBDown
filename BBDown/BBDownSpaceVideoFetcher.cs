@@ -33,14 +33,14 @@ namespace BBDown
                 pageNumber++;
                 urls.AddRange(GetVideosByPage(pageNumber, pageSize,  id));
             }
-            File.WriteAllText($"{userName}的投稿视频.txt", string.Join('\n', urls));
-            Log("目前下载器不支持下载用户的全部投稿视频，不过程序已经获取到了该用户的全部投稿视频地址，你可以自行使用批处理脚本等手段调用本程序进行批量下载。如在Windows系统你可以使用如下代码：");
+            File.WriteAllText($"{userName}的投稿影片.txt", string.Join('\n', urls));
+            Log("目前下載器不支持下載用戶的全部投稿影片，不過程序已經獲取到了該用戶的全部投稿影片網址，你可以自行使用批處理腳本等手段調用本程式進行批次下載。如在Windows系統你可以使用如下代碼：");
             Console.WriteLine();
             Console.WriteLine(@"@echo Off
 For / F %%a in (urls.txt) Do (BBDown.exe ""%%a"")
 pause");
             Console.WriteLine();
-            throw new Exception("暂不支持该功能");
+            throw new Exception("暫不支持該功能");
         }
 
         List<string> GetVideosByPage(int pageNumber, int pageSize, string mid)

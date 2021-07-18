@@ -37,7 +37,7 @@ namespace BBDown
         private static string language = "zh";
 
         /// <summary>
-        /// 发起请求并返回响应报文(protobuf -> json)
+        /// 發起請求並返迴響應報文(protobuf -> json)
         /// </summary>
         /// <param name="epId"></param>
         /// <param name="cid"></param>
@@ -57,7 +57,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 将protobuf转换成网页那种json 这样就不用修改之前的解析逻辑了
+        /// 將protobuf轉換成網頁那種json 這樣就不用修改之前的解析邏輯了
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -137,7 +137,7 @@ namespace BBDown
         }
 
 
-        #region 生成Headers相关方法
+        #region 生成Headers相關方法
 
         private static Dictionary<string, string> GetHeader(string appkey)
         {
@@ -214,7 +214,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 对象转字节数组
+        /// 對象轉位元組數組
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -228,7 +228,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 序列化为字符串
+        /// 序列化為字串
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -240,7 +240,7 @@ namespace BBDown
         #endregion
 
         /// <summary>
-        /// 对象转字符串(json)
+        /// 對象轉字串(json)
         /// </summary>
         /// <param name="obj"></param>
         /// <returns></returns>
@@ -250,10 +250,10 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 读取gRPC响应流 通过前5字节信息 解析/解压后面的报文体
+        /// 讀取gRPC響應流 通過前5位元組訊息 解析/解壓後面的報文體
         /// </summary>
         /// <param name="data"></param>
-        /// <returns>字节流</returns>
+        /// <returns>位元組流</returns>
         private static byte[] ReadMessage(byte[] data)
         {
             byte first;
@@ -267,11 +267,11 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 读取gRPC响应流 通过前5字节信息 解析/解压后面的报文体
+        /// 讀取gRPC響應流 通過前5位元組訊息 解析/解壓後面的報文體
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="data"></param>
-        /// <returns>对应的protobuf</returns>
+        /// <returns>對應的protobuf</returns>
         private static T ReadMessage<T>(byte[] data)
         {
             var msg = ReadMessage(data);
@@ -280,7 +280,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 读取报文长度
+        /// 讀取報文長度
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -299,7 +299,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 给请求载荷添加头部信息
+        /// 給請求載荷添加頭部訊息
         /// </summary>
         /// <param name="input"></param>
         /// <returns></returns>
@@ -320,7 +320,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// gzip压缩
+        /// gzip壓縮
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
@@ -337,7 +337,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// gzip解压
+        /// gzip解壓
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>

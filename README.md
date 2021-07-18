@@ -1,199 +1,186 @@
-[![img](https://img.shields.io/github/stars/nilaoda/BBDown?label=%E7%82%B9%E8%B5%9E)](https://github.com/nilaoda/BBDown)  [![img](https://img.shields.io/github/last-commit/nilaoda/BBDown?label=%E6%9C%80%E8%BF%91%E6%8F%90%E4%BA%A4)](https://github.com/nilaoda/BBDown)  [![img](https://img.shields.io/github/release/nilaoda/BBDown?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC)](https://github.com/nilaoda/BBDown/releases)  [![img](https://img.shields.io/github/license/nilaoda/BBDown?label=%E8%AE%B8%E5%8F%AF%E8%AF%81)](https://github.com/nilaoda/BBDown)
+[![img](https://img.shields.io/github/stars/RyanL-29/BBDown?label=%E7%82%B9%E8%B5%9E)](https://github.com/RyanL-29/BBDown)  [![img](https://img.shields.io/github/last-commit/RyanL-29/BBDown?label=%E6%9C%80%E8%BF%91%E6%8F%90%E4%BA%A4)](https://github.com/RyanL-29/BBDown)  [![img](https://img.shields.io/github/release/RyanL-29/BBDown?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC)](https://github.com/RyanL-29/BBDown/releases)  [![img](https://img.shields.io/github/license/RyanL-29/BBDown?label=%E8%AE%B8%E5%8F%AF%E8%AF%81)](https://github.com/RyanL-29/BBDown)
 
-# BBDown
-一款命令行式哔哩哔哩下载器. Bilibili Downloader.
+# BBDown Server Edition
+BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟體. 24/7 version (fork from BBDown)
 
-# 注意
-本软件合并时需要使用[ffmpeg](https://www.gyan.dev/ffmpeg/builds/) ，非`win-x64`平台请自行下载配置，并加入环境变量.
+此版本適用於伺服器及Windwos Server 2019 NAS上面使用, 可以全自動運行
+測試環境為 Windows Server 2019
 
-也可能需要使用[mp4box](https://gpac.wp.imt.fr/downloads/)，至少用于合并**杜比视界**.
-
-# 快速开始
-本软件已经以 [Dotnet Tool](https://www.nuget.org/packages/BBDown/) 形式发布  
-
-如果你本地有dotnet环境，使用如下命令即可安装使用
-```
-dotnet tool install --global BBDown
-```
-
-# 下载
+# 下載
 https://github.com/nilaoda/BBDown/releases
 
-# 开始使用
-目前命令行参数支持情况
+# 開始使用
+目前命令行參數支持情況
 ```
 BBDown:
-  BBDown是一个免费且便捷高效的哔哩哔哩下载/解析软件.
+  BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟體.
 
 Usage:
   BBDown [options] <url> [command]
 
 Arguments:
-  <url>    视频地址 或 av|bv|BV|ep|ss
+  <url>    影片網址 或 av|bv|BV|ep|ss
 
 Options:
-  -tv, --use-tv-api                        使用TV端解析模式
-  -app, --use-app-api                      使用APP端解析模式
-  -intl, --use-intl-api                    使用国际版解析模式
-  --use-mp4box                             使用MP4Box来混流
-  -hevc, --only-hevc                       只下载hevc编码
-  -avc, --only-avc                         只下载avc编码
-  -info, --only-show-info                  仅解析而不进行下载
-  -hs, --hide-streams                      不要显示所有可用音视频流
-  -ia, --interactive                       交互式选择清晰度
-  --show-all                               展示所有分P标题
-  --use-aria2c                             调用aria2c进行下载(你需要自行准备好二进制可执行文件)
-  --aria2c-proxy <aria2c-proxy>            调用aria2c进行下载时的代理地址配置
-  -mt, --multi-thread                      使用多线程下载
-  -p, --select-page <select-page>          选择指定分p或分p范围：(-p 8 或 -p 1,2 或 -p 3-5 或 -p ALL)
-  --audio-only                             仅下载音频
-  --video-only                             仅下载视频
-  --sub-only                               仅下载字幕
-  --no-padding-page-num                    不给分P序号补零
-  --debug                                  输出调试日志
-  --skip-mux                               跳过混流步骤
-  --language <language>                    设置混流的音频语言(代码)，如chi, jpn等
-  -c, --cookie <cookie>                    设置字符串cookie用以下载网页接口的会员内容
-  -token, --access-token <access-token>    设置access_token用以下载TV/APP接口的会员内容
-  --version                                Show version information
-  -?, -h, --help                           Show help and usage information
+  -tv, --use-tv-api                    使用TV端解析模式
+  -intl, --use-intl-api                使用國際版解析模式
+  -hevc, --only-hevc                   下載hevc編碼
+  -info, --only-show-info              只解析不下載
+  -hs, --hide-streams                  不要顯示所有可用音影片軌
+  -ia, --interactive                   互動式選擇清晰度
+  --show-all                           展示所有分P資訊
+  --use-aria2c                        使用aria2c下載(你需要自行準備二進位制可執行文件)
+  -mt, --multi-thread                  使用多執行緒下載
+  -p, --select-page <select-page>      選擇指定分p或分p範圍
+  --audio-only                         只下載音訊
+  --video-only                          只下載視訊
+  --debug                              輸出除錯日誌
+  --skip-mux                           跳過混流步驟
+  --language <language>                設置混流的音訊語言(代碼)，如chi, jpn等
+  -a, --access-token <access-token>    設置access_token用以下載TV介面的會員內容
+  --version                            Show version information
+  -?, -h, --help                       Show help and usage information
 
 Commands:
-  login      通过APP扫描二维码以登录您的WEB账号
-  logintv    通过APP扫描二维码以登录您的TV账号
+  login      通過APP掃描二維碼以登錄您的WEB帳號
+  logintv    通過APP掃描二維碼以登錄您的TV帳號
 ```
 
 # 功能
-- [x] 番剧下载(Web|TV|App)
-- [x] 课程下载(Web)
-- [x] 普通内容下载(Web|TV|App) `(TV接口可以下载部分UP主的无水印内容)`
-- [x] 多分P自动下载
-- [x] 选择指定分P进行下载
-- [x] 选择指定清晰度进行下载
-- [x] 下载外挂字幕并转换为srt格式
-- [x] 自动合并音频+视频流+字幕流`(使用ffmpeg或mp4box)`
-- [x] 单独下载视频或音频轨道
-- [x] 二维码登录账号
-- [x] **多线程下载**
-- [x] 支持调用aria2c下载
-- [x] **支持HDR/杜比视界/杜比全景声下载**`(需要使用App接口且输入会员token)`
+- [x] 番劇下載(Web|TV)
+- [x] 課程下載(Web)
+- [x] 普通內容下載(Web|TV) `(TV介面可以下載部分UP主的無浮水印內容)`
+- [x] 多分P自動下載
+- [x] 選擇指定分P進行下載
+- [x] 選擇指定清晰度進行下載
+- [x] 下載外掛字幕並轉換為srt格式
+- [x] 自動合併音訊+影片軌+字幕流
+- [x] 二維碼登錄帳號
+- [x] **多執行緒下載**
+- [x] 支持調用aria2c下載
+- [x] 支持至高4K HDR清晰度下載
+- [x] 可自行設定檢查更新間隔時間
+- [x] 可自行設定影片下載目錄
+- [x] 可自行設定下載檔名前綴後綴
+- [x] 自動增加簡轉繁字幕 (編譯需要自行下載 [OpenCC](https://github.com/RyanL-29/OpenCC-NET))
+- [x] 解析度將會自動加上至檔名
+- [x] 全自動執行(暫時透過 batch script 來實現)
+- [x] 可以批次下載
+
+# 改善
+- [x] 除了影片分片外快取資料夾不會被剷除
+- [x] 解決字幕重複下載問題
+- [x] 解決快取資料夾被剷除後再次下載問題
+- [x] 所有快取資料夾都會被放在 temp 裡面
 
 # TODO
-- [ ] 支持更多自定义选项
-- [ ] 自动刷新cookie
-- [ ] 下载指定收藏夹中的视频
-- [ ] 下载某个个人空间页的视频
-- [ ] 自定义存储文件名等
-- [ ] 弹幕下载&转换
+- [ ] 支持更多自訂選項
+- [ ] 自動刷新cookie
+- [ ] 跟著主線更新
+- [ ] 實現整段命令行參數在Config.json設置
+- [ ] 真正全自動執行
 
-# 使用教程
+# 已知問題
+- [ ] 部分新番下載時會出現下載錯誤 (不會影響自動程序)
+- [x] 部分新番無法下載字幕 (請重新獲取 cookie)
 
-<details>
-<summary>WEB/TV鉴权</summary>  
+# 使用範例
 
----
-  
-扫码登录网页账号：
+掃碼登錄網頁帳號：
 ```
 BBDown login
 ```
-然后按照提示操作
-
-扫码登录云视听小电视账号：
+掃碼登錄雲視聽小電視帳號：
 ```
 BBDown logintv
 ```
-然后按照提示操作
  
-*PS: 如果登录报错`The type initializer for 'Gdip' threw an exception`，请参考 [#37](https://github.com/nilaoda/BBDown/issues/37) 解决*
+*PS: 如果登錄報錯`The type initializer for 'Gdip' threw an exception`，請參考 [#37](https://github.com/nilaoda/BBDown/issues/37) 解決*
 
-手动加载网页cookie：
+手動載入雲視聽小電視token：
 ```
-BBDown -c "SESSDATA=******" "https://www.bilibili.com/video/BV1qt4y1X7TW"
+BBDown -a "access_token=******" "https://www.bilibili.com/video/BV1qt4y1X7TW"
 ```
-手动加载云视听小电视token：
-```
-BBDown -tv -token "******" "https://www.bilibili.com/video/BV1qt4y1X7TW"
-```
-
-</details>
-
-<details>
-<summary>APP鉴权</summary>  
-
----
-
-> 根据 [#123](https://github.com/nilaoda/BBDown/issues/123#issuecomment-877583825) ，可以填写TV登录产生的`access_token`来给APP接口使用。可复制`BBDownTV.data`到`BBDownApp.data`使程序自动读取.
-
-目前程序无法自动获取鉴权信息，推荐通过**抓包**来获取.
-
-在请求Header中寻找键为`authorization`的项，其值形为`identify_v1 5227************1`，其中的`5227************1`就是token(access_key)
-
-获取后手动通过`-token`命令加载, 或写入`BBDownApp.data`使程序自动读取.
-  
-```
-BBDown -app -token "******" "https://www.bilibili.com/video/BV1qt4y1X7TW"
-```
-
-</details>
-
-<details>
-<summary>常用命令</summary>  
-
----
-
-下载普通视频：
+下載普通影片：
 ```
 BBDown "https://www.bilibili.com/video/BV1qt4y1X7TW"
 ```
-使用TV接口下载(粉丝量大的UP主基本上是无水印片源)：
+使用TV介面下載(粉絲量大的UP主基本上是無浮水印片源)：
 ```
 BBDown -tv "https://www.bilibili.com/video/BV1qt4y1X7TW"
 ```
-当分P过多时，默认会隐藏展示全部的分P信息，你可以使用如下命令来显示所有每一个分P。
+當分P過多時，預設會隱藏展示全部的分P訊息，你可以使用如下命令來顯示所有每一個分P。
 ```
 BBDown --show-all "https://www.bilibili.com/video/BV1At41167aj"
 ```
-选择下载某些分P的三种情况：
-* 单个分P：10
+選擇下載某些分P的三種情況：
+* 單個分P：10
 ```
 BBDown "https://www.bilibili.com/video/BV1At41167aj?p=10"
+```
+```
 BBDown -p 10 "https://www.bilibili.com/video/BV1At41167aj"
 ```
-* 多个分P：1,2,10
+* 多個分P：1,2,10
 ```
 BBDown -p 1,2,10 "https://www.bilibili.com/video/BV1At41167aj"
 ```
-* 范围分P：1-10
+* 範圍分P：1-10
 ```
 BBDown -p 1-10 "https://www.bilibili.com/video/BV1At41167aj"
 ```
-下载番剧全集：
+下載番劇全集：
 ```
 BBDown -p ALL "https://www.bilibili.com/bangumi/play/ss33073"
 ```
+下載番劇最新一集：
+```
+BBDown -p LATEST "https://www.bilibili.com/bangumi/play/ss33073"
+```
 
-</details>
+------------
 
-# 更新日志
 
-请查看 [changelog.txt](https://github.com/nilaoda/BBDown/blob/master/BBDown/changelog.txt)
+## **bilibilidown.bat 是主要執行檔, 設置好再按他就可以執行, 如非必要請勿更改檔名, 更改後不作任何設置100%不能用**
 
-# 演示
-![1](https://user-images.githubusercontent.com/20772925/88686407-a2001480-d129-11ea-8aac-97a0c71af115.gif)
+#Config.json 設置
 
-下载完毕后在当前目录查看MP4文件：
+```
+{
+ "dir": "C:/Users/Ryan/Desktop/test",  #影片檔案存放位置
+ "prefix": "[Test]", #檔名前綴
+ "suffix": "[Bilibili][test]", #檔名後綴
+ "UserAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/88.0.4324.190 Safari/537.36" #User-Agent
+}
+```
+#cookie.txt
+```
+SESSDATA=xxxxxx%xxxxxxxxx%xxxxxxx%xxxx
+#BBDown.exe login 命令行取得的cookie
+```
+#更新間隔時間設置 (bilibilidown.bat)
+```
+@echo off
 
-![2](https://user-images.githubusercontent.com/20772925/88478901-5e1cdc00-cf7e-11ea-97c1-154b9226564e.png)
+:loop
 
-# 致谢
+call config.bat
+pause
+timeout /T 300 /NOBREAK > nul  #300是停止秒數 = 5 分鐘執行一次
 
-* https://github.com/codebude/QRCoder
-* https://github.com/icsharpcode/SharpZipLib
-* https://github.com/protobuf-net/protobuf-net
-* https://github.com/dotnet/command-line-api
-* https://github.com/SocialSisterYi/bilibili-API-collect
-* https://github.com/SeeFlowerX/bilibili-grpc-api
-* https://github.com/FFmpeg/FFmpeg
-* https://github.com/gpac/gpac
-* https://github.com/aria2/aria2
+goto loop
+```
+#自動更新及批次下載設置(config.bat)
+```
+  REM 五等分的新娘∬
+  BBDown.exe -mt -p 8 https://www.bilibili.com/bangumi/play/ss37808
+
+  #參數基本上和主線的那個一樣, 只是不需要在這裡設置cookie
+```
+
+# 示範
+![1](https://raw.githubusercontent.com/RyanL-29/BBDown/master/ScreenShot/2021-03-05%2021-13-40.gif)
+
+下載完畢後在上面你自訂的的目錄查看MP4文件：
+
+![2](https://raw.githubusercontent.com/RyanL-29/BBDown/master/ScreenShot/Screenshot%202021-03-05%20211752.png)

@@ -8,6 +8,7 @@ using static BBDown.BBDownUtil;
 using static BBDown.BBDownSubUtil;
 using static BBDown.BBDownLogger;
 using System.IO;
+using OpenCC.NET;
 
 namespace BBDown
 {
@@ -69,13 +70,13 @@ namespace BBDown
                 }
             }
 
-            //----分析完毕
+            //----分析完畢
             var arguments = inputArg.ToString() + (metaArg.ToString() == "" ? "" : " -itags tools=\"\"" + metaArg.ToString()) + $" \"{outPath}\"";
             LogDebug("mp4box命令：{0}", arguments);
             return RunExe("mp4box", arguments);
         }
 
-        public static int MuxAV(bool useMp4box, string videoPath, string audioPath, string outPath, string desc = "", string title = "", string episodeId = "", string pic = "", string lang = "", List<Subtitle> subs = null, bool audioOnly = false, bool videoOnly = false)
+        public static int MuxAV(bool useMp4box, string videoPath, string audioPath, string outPath, string desc = "", string title = "", string episodeId = "", string pic = "", string lang = "", List<Subtitle> subs = null, bool audioOnly = false, bool videoOnly = false, string aid = "", string cid = "")
         {
             desc = EscapeString(desc);
             title = EscapeString(title);
@@ -88,7 +89,7 @@ namespace BBDown
 
             if (outPath.Contains("/") && ! Directory.Exists(Path.GetDirectoryName(outPath)))
                 Directory.CreateDirectory(Path.GetDirectoryName(outPath));
-            //----分析并生成-i参数
+            //----分析並生成-i參數
             StringBuilder inputArg = new StringBuilder();
             StringBuilder metaArg = new StringBuilder();
             if (!string.IsNullOrEmpty(videoPath))
@@ -97,6 +98,7 @@ namespace BBDown
                 inputArg.Append($" -i \"{audioPath}\" ");
             if (!string.IsNullOrEmpty(pic))
                 inputArg.Append($" -i \"{pic}\" ");
+            string[] files = System.IO.Directory.GetFiles(Directory.GetCurrentDirectory(), $"temp/{aid}/{aid}.{cid}.*.srt");
             if (subs != null)
             {
                 for (int i = 0; i < subs.Count; i++)
@@ -104,8 +106,17 @@ namespace BBDown
                     if(File.Exists(subs[i].path) && File.ReadAllText(subs[i].path) != "")
                     {
                         inputArg.Append($" -i \"{subs[i].path}\" ");
-                        metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} ");
+                        metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} -metadata:s:s:{i} title=\"{SubTitleDic[subs[i].lan]}\"");
                     }
+                }
+                if (files.Length > 0 && subs.Count < 1)
+                {
+                    Log("正在合併現有字幕...");
+                    for (int e = 0; e < files.Length; e++)
+                    {
+                        inputArg.Append($" -i \"{files[e]}\" ");
+                    }
+
                 }
             }
             if (!string.IsNullOrEmpty(pic))
@@ -115,13 +126,16 @@ namespace BBDown
             {
                 inputArg.Append($" -map {i} ");
             }
-
-            //----分析完毕
+            var converter = new OpenChineseConverter();
+            string titletcov = converter.ToTaiwanFromSimplifiedWithPhrases(title);
+            titletcov = titletcov.Remove(titletcov.IndexOf("（"));
+            string desccov = converter.ToTaiwanFromSimplifiedWithPhrases(desc);
+            //----分析完畢
             var arguments = $"-loglevel warning -y " +
-                 inputArg.ToString() + metaArg.ToString() + $" -metadata title=\"" + (episodeId == "" ? title : episodeId) + "\" " +
+                 inputArg.ToString() + metaArg.ToString() + $" -metadata title=\"" + titletcov + "\" " +
                  (lang == "" ? "" : $"-metadata:s:a:0 language={lang} ") +
                  $"-metadata description=\"{desc}\" " +
-                 (episodeId == "" ? "" : $"-metadata album=\"{title}\" ") +
+                 $"-metadata album=\"{titletcov}\" " +
                  (audioOnly ? " -vn " : "") + (videoOnly ? " -an " : "") +
                  $"-c copy " +
                  (subs != null ? " -c:s mov_text " : "") +

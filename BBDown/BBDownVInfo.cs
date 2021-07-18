@@ -8,27 +8,27 @@ namespace BBDown
     class BBDownVInfo
     {
         /// <summary>
-        /// 视频index 用于番剧或课程判断当前选择的是第几集
+        /// 影片index 用於番劇或課程判斷當前選擇的是第幾集
         /// </summary>
         private string index;
 
         /// <summary>
-        /// 视频标题
+        /// 影片標題
         /// </summary>
         private string title;
 
         /// <summary>
-        /// 视频描述
+        /// 影片描述
         /// </summary>
         private string desc;
 
         /// <summary>
-        /// 视频封面
+        /// 影片封面
         /// </summary>
         private string pic;
 
         /// <summary>
-        /// 视频发布时间
+        /// 影片發布時間
         /// </summary>
         private string pubTime;
 
@@ -36,7 +36,7 @@ namespace BBDown
         private bool isCheese;
 
         /// <summary>
-        /// 视频分P信息
+        /// 影片分P訊息
         /// </summary>
         private List<Page> pagesInfo;
 

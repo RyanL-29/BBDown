@@ -82,9 +82,9 @@ namespace BBDown
 
             foreach (var page in pages)
             {
-                //跳过预告
+                //跳過預告
                 JsonElement badge;
-                if (page.TryGetProperty("badge", out badge) && badge.ToString() == "预告") continue;
+                if (page.TryGetProperty("badge", out badge) && badge.ToString() == "預告") continue;
                 string res = "";
                 try
                 {

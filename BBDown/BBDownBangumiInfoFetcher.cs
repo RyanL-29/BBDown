@@ -25,7 +25,7 @@ namespace BBDown
             List<Page> pagesInfo = new List<Page>();
             int i = 1;
 
-            //episodes为空; 或者未包含对应epid，番外/花絮什么的
+            //episodes為空; 或者未包含對應epid，番外/花絮什麼的
             if (pages.Count == 0 || !result.GetProperty("episodes").ToString().Contains($"/ep{id}")) 
             {
                 JsonElement sections;
@@ -45,9 +45,9 @@ namespace BBDown
 
             foreach (var page in pages)
             {
-                //跳过预告
+                //跳過預告
                 JsonElement badge;
-                if (page.TryGetProperty("badge", out badge) && badge.ToString() == "预告") continue;
+                if (page.TryGetProperty("badge", out badge) && badge.ToString() == "預告") continue;
                 string res = "";
                 try
                 {

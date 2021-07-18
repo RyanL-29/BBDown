@@ -44,7 +44,7 @@ namespace BBDown
                 {
                     bangumi = true;
                     string epId = Regex.Match(data.GetProperty("redirect_url").ToString(), "ep(\\d+)").Groups[1].Value;
-                    //番剧内容通常不会有分P，如果有分P则不需要epId参数
+                    //番劇內容通常不會有分P，如果有分P則不需要epId參數
                     if (pages.Count == 1)
                     {
                         pagesInfo.ForEach(p => p.epid = epId);

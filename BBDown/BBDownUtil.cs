@@ -27,11 +27,11 @@ namespace BBDown
             {
                 var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
                 string nowVer = $"{ver.Major}.{ver.Minor}.{ver.Build}";
-                string redirctUrl = await Get302("https://github.com/nilaoda/BBDown/releases/latest");
-                string latestVer = redirctUrl.Replace("https://github.com/nilaoda/BBDown/releases/tag/", "");
+                string redirctUrl = await Get302("https://github.com/RyanL-29/BBDown/releases/latest");
+                string latestVer = redirctUrl.Replace("https://github.com/RyanL-29/BBDown/releases/tag/", "");
                 if (nowVer != latestVer && !latestVer.StartsWith("https"))
                 {
-                    Console.Title = $"发现新版本：{latestVer}";
+                    Console.Title = $"發現新版本：{latestVer}";
                 }
             }
             catch (Exception)
@@ -129,7 +129,7 @@ namespace BBDown
             }
             else
             {
-                throw new Exception("输入有误");
+                throw new Exception("輸入有誤");
             }
         }
 
@@ -179,12 +179,12 @@ namespace BBDown
                     webRequest.Headers.Add("Referer", "https://www.bilibili.com");
                 webRequest.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
                 webRequest.KeepAlive = false;
-                webRequest.AllowAutoRedirect = true;  //自动跳转
-                LogDebug("获取网页内容：Url: {0}, Headers: {1}", url, webRequest.Headers);
+                webRequest.AllowAutoRedirect = true;  //自動跳轉
+                LogDebug("獲取網頁內容：Url: {0}, Headers: {1}", url, webRequest.Headers);
 
                 HttpWebResponse webResponse = (HttpWebResponse)webRequest.GetResponse();
                 if (webResponse.ContentEncoding != null
-                    && webResponse.ContentEncoding.ToLower() == "gzip") //如果使用了GZip则先解压
+                    && webResponse.ContentEncoding.ToLower() == "gzip") //如果使用了GZip則先解壓
                 {
                     using (Stream streamReceive = webResponse.GetResponseStream())
                     {
@@ -242,7 +242,7 @@ namespace BBDown
             myRequestStream.Close();
             HttpWebResponse webResponse = (HttpWebResponse)request.GetResponse();
             if (webResponse.ContentEncoding != null
-                && webResponse.ContentEncoding.ToLower() == "gzip") //如果使用了GZip则先解压
+                && webResponse.ContentEncoding.ToLower() == "gzip") //如果使用了GZip則先解壓
             {
                 using (Stream streamReceive = webResponse.GetResponseStream())
                 {
@@ -303,7 +303,7 @@ namespace BBDown
             {
                 BBDownAria2c.DownloadFileByAria2c(url, path, aria2cProxy);
                 if (File.Exists(path + ".aria2") || !File.Exists(path))
-                    throw new Exception("aria2下载可能存在错误");
+                    throw new Exception("aria2下載可能存在錯誤");
                 Console.WriteLine();
                 return;
             }
@@ -327,7 +327,7 @@ namespace BBDown
                 if (new FileInfo(tmpName).Length == totalLength)
                     File.Move(tmpName, path, true);
                 else
-                    throw new Exception("文件下载可能不完整, 请重新下载");
+                    throw new Exception("文件下載可能不完整, 請重新下載");
             }
         }
 
@@ -358,15 +358,15 @@ namespace BBDown
             {
                 BBDownAria2c.DownloadFileByAria2c(url, path, aria2cProxy);
                 if (File.Exists(path + ".aria2") || !File.Exists(path))
-                    throw new Exception("aria2下载可能存在错误");
+                    throw new Exception("aria2下載可能存在錯誤");
                 Console.WriteLine();
                 return;
             }
             long fileSize = GetFileSize(url);
-            LogDebug("文件大小：{0} bytes", fileSize);
+            LogDebug("檔案大小：{0} bytes", fileSize);
             List<Clip> allClips = GetAllClips(url, fileSize);
             int total = allClips.Count;
-            LogDebug("分段数量：{0}", total);
+            LogDebug("分段數量：{0}", total);
             long done = 0;
             using (var progress = new ProgressBar())
             {
@@ -417,7 +417,7 @@ namespace BBDown
                          progress.Report((double)done / fileSize);
                      }
                  });
-                /*//多线程设置
+                /*//多執行緒設置
                 ParallelOptions parallelOptions = new ParallelOptions
                 {
                     MaxDegreeOfParallelism = 8
@@ -474,7 +474,7 @@ namespace BBDown
             }
         }
 
-        //此函数主要是切片下载逻辑
+        //此函數主要是切片下載邏輯
         private static List<Clip> GetAllClips(string url, long fileSize)
         {
             List<Clip> clips = new List<Clip>();
@@ -487,7 +487,7 @@ namespace BBDown
                 c.index = index;
                 c.from = counter;
                 c.to = c.from + perSize;
-                //没到最后
+                //沒到最後
                 if (fileSize - perSize > 0)
                 {
                     fileSize -= perSize;
@@ -495,7 +495,7 @@ namespace BBDown
                     index++;
                     clips.Add(c);
                 }
-                //已到最后
+                //已到最後
                 else
                 {
                     c.to = -1;
@@ -507,7 +507,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 输入一堆已存在的文件，合并到新文件
+        /// 輸入一堆已存在的文件，合併到新文件
         /// </summary>
         /// <param name="files"></param>
         /// <param name="outputFilePath"></param>
@@ -542,7 +542,7 @@ namespace BBDown
         }
 
         /// <summary>
-        /// 寻找指定目录下指定后缀的文件的详细路径 如".txt"
+        /// 尋找指定目錄下指定後綴的文件的詳細路徑 如".txt"
         /// </summary>
         /// <param name="dir"></param>
         /// <param name="ext"></param>
@@ -615,10 +615,10 @@ namespace BBDown
 
         
         /// <summary>    
-        /// 获取url字符串参数，返回参数值字符串    
+        /// 獲取url字串參數，返回參數值字串    
         /// </summary>    
-        /// <param name="name">参数名称</param>    
-        /// <param name="url">url字符串</param>    
+        /// <param name="name">參數名稱</param>    
+        /// <param name="url">url字串</param>    
         /// <returns></returns>    
         public static string GetQueryString(string name, string url)
         {
@@ -640,7 +640,7 @@ namespace BBDown
             WebClient webClient = new WebClient();
             NameValueCollection postValues = new NameValueCollection();
             postValues.Add("oauthKey", oauthKey);
-            postValues.Add("gourl", "https%3A%2F%2Fwww.bilibili.com%2F");
+            postValues.Add("gourl", "https://www.bilibili.com/");
             byte[] responseArray = webClient.UploadValues(queryUrl, postValues);
             return Encoding.UTF8.GetString(responseArray);
         }
@@ -648,7 +648,7 @@ namespace BBDown
         //https://s1.hdslb.com/bfs/static/player/main/video.9efc0c61.js
         public static string GetSession(string buvid3)
         {
-            //这个参数可以没有 所以此处就不写具体实现了
+            //這個參數可以沒有 所以此處就不寫具體實現了
             throw new NotImplementedException();
         }
 

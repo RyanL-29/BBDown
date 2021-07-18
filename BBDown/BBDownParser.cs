@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using static BBDown.BBDownUtil;
@@ -44,14 +45,20 @@ namespace BBDown
                 api = $"https://{prefix}?" + api + (bangumi ? $"&sign={GetSign(api)}" : "");
             }
 
-            //课程接口
+            //課程介面
             if (cheese) api = api.Replace("/pgc/", "/pugv/");
 
             //Console.WriteLine(api);
             string webJson = GetWebSource(api);
-            //以下情况从网页源代码尝试解析
+            //以下情況從網頁原始碼嘗試解析
             if (webJson.Contains("\"大会员专享限制\""))
             {
+                string cookiePath = Directory.GetCurrentDirectory();
+                if (File.Exists($"cookie.txt"))
+                {
+                    File.Delete($"{cookiePath}/cookie.txt");
+                    File.Create($"{cookiePath}/invalid_cookie.txt");
+                }
                 string webUrl = "https://www.bilibili.com/bangumi/play/ep" + epId;
                 string webSource = GetWebSource(webUrl);
                 webJson = Regex.Match(webSource, @"window.__playinfo__=([\s\S]*?)<\/script>").Groups[1].Value;
@@ -62,7 +69,7 @@ namespace BBDown
         private static string GetPlayJson(string aid, string cid, string epId, string qn)
         {
             string api = $"https://api.global.bilibili.com/intl/gateway/v2/ogv/playurl?" +
-                $"aid={aid}&appkey=7d089525d3611b1c&build=1000310&c_locale=&channel=master&cid={cid}&ep_id={epId}&force_host=0&fnvalfnval=80&fnver=0&fourk=1&lang=hans&locale=zh_CN&mobi_app=bstar_a&platform=android&prefer_code_type=0&qn={qn}&timezone=GMT%2B08%3A00&ts={GetTimeStamp(true)}" + (Program.TOKEN != "" ? $"&access_key={Program.TOKEN}" : "");
+                $"aid={aid}&appkey=7d089525d3611b1c&build=1000310&c_locale=&channel=master&cid={cid}&ep_id={epId}&force_host=0&fnvalfnval=80&fnver=0&fourk=1&lang=hans&locale=zh_CN&mobi_app=bstar_a&platform=android&prefer_code_type=0&qn={qn}&timezone=GMT+08:00&ts={GetTimeStamp(true)}" + (Program.TOKEN != "" ? $"&access_key={Program.TOKEN}" : "");
             string webJson = GetWebSource(api);
             return webJson;
         }
@@ -74,13 +81,13 @@ namespace BBDown
             List<string> clips = new List<string>();
             List<string> dfns = new List<string>();
 
-            //调用解析
+            //調用解析
             string webJsonStr = GetPlayJson(onlyAvc, aidOri, aid, cid, epId, tvApi, intlApi, appApi);
 
             var respJson = JsonDocument.Parse(webJsonStr);
             var data = respJson.RootElement;
 
-            //intl接口
+            //intl介面
             if (webJsonStr.Contains("\"stream_list\""))
             {
                 int pDur = data.GetProperty("data").GetProperty("video_info").GetProperty("timelength").GetInt32() / 1000;
@@ -165,7 +172,7 @@ namespace BBDown
                     }
                 }
 
-                //此处处理免二压视频，需要单独再请求一次
+                //此處處理免二壓影片，需要單獨再請求一次
                 if (!reParse && !appApi)
                 {
                     reParse = true;
@@ -189,7 +196,7 @@ namespace BBDown
             }
             else if (webJsonStr.Contains("\"durl\":[")) //flv
             {
-                //默认以最高清晰度解析
+                //默認以最高清晰度解析
                 webJsonStr = GetPlayJson(onlyAvc, aidOri, aid, cid, epId, tvApi, intlApi, appApi, GetMaxQn());
                 respJson = JsonDocument.Parse(webJsonStr);
                 string quality = "";
@@ -201,7 +208,7 @@ namespace BBDown
                 {
                     quality = respJson.RootElement.GetProperty("data").GetProperty("quality").ToString();
                     videoCodecid = respJson.RootElement.GetProperty("data").GetProperty("video_codecid").ToString();
-                    //获取所有分段
+                    //獲取所有分段
                     foreach (var node in respJson.RootElement.GetProperty("data").GetProperty("durl").EnumerateArray().ToList())
                     {
                         clips.Add(node.GetProperty("url").ToString());
@@ -230,12 +237,12 @@ namespace BBDown
                 }
                 else
                 {
-                    //如果获取数据失败，尝试从根路径获取数据
+                    //如果獲取數據失敗，嘗試從根路徑獲取數據
                     string nodeinfo = respJson.ToString();
                     var nodeJson = JsonDocument.Parse(nodeinfo).RootElement;
                     quality = nodeJson.GetProperty("quality").ToString();
                     videoCodecid = nodeJson.GetProperty("video_codecid").ToString();
-                    //获取所有分段
+                    //獲取所有分段
                     foreach (var node in nodeJson.GetProperty("durl").EnumerateArray())
                     {
                         clips.Add(node.GetProperty("url").ToString());
@@ -247,7 +254,7 @@ namespace BBDown
                     JsonElement acceptQuality;
                     if (nodeJson.TryGetProperty("qn_extras", out qnExtras))
                     {
-                        //获取可用清晰度
+                        //獲取可用清晰度
                         foreach (var node in qnExtras.EnumerateArray())
                         {
                             dfns.Add(node.GetProperty("qn").ToString());
