@@ -13,37 +13,43 @@ https://github.com/nilaoda/BBDown/releases
 目前命令行參數支持情況
 ```
 BBDown:
-  BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟體.
+  BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟件.
 
 Usage:
   BBDown [options] <url> [command]
 
 Arguments:
-  <url>    影片網址 或 av|bv|BV|ep|ss
+  <url> 視頻地址 或 av|bv|BV|ep|ss
 
 Options:
-  -tv, --use-tv-api                    使用TV端解析模式
-  -intl, --use-intl-api                使用國際版解析模式
-  -hevc, --only-hevc                   下載hevc編碼
-  -info, --only-show-info              只解析不下載
-  -hs, --hide-streams                  不要顯示所有可用音影片軌
-  -ia, --interactive                   互動式選擇清晰度
-  --show-all                           展示所有分P資訊
-  --use-aria2c                        使用aria2c下載(你需要自行準備二進位制可執行文件)
-  -mt, --multi-thread                  使用多執行緒下載
-  -p, --select-page <select-page>      選擇指定分p或分p範圍
-  --audio-only                         只下載音訊
-  --video-only                          只下載視訊
-  --debug                              輸出除錯日誌
-  --skip-mux                           跳過混流步驟
-  --language <language>                設置混流的音訊語言(代碼)，如chi, jpn等
-  -a, --access-token <access-token>    設置access_token用以下載TV介面的會員內容
-  --version                            Show version information
-  -?, -h, --help                       Show help and usage information
+  -tv, --use-tv-api 使用TV端解析模式
+  -app, --use-app-api 使用APP端解析模式
+  -intl, --use-intl-api 使用國際版解析模式
+  --use-mp4box 使用MP4Box來混流
+  -hevc, --only-hevc 只下載hevc編碼
+  -avc, --only-avc 只下載avc編碼
+  -info, --only-show-info 僅解析而不進行下載
+  -hs, --hide-streams 不要顯示所有可用音視頻流
+  -ia, --interactive 交互式選擇清晰度
+  --show-all 展示所有分P標題
+  --use-aria2c 調用aria2c進行下載(你需要自行準備好二進制可執行文件)
+  --aria2c-proxy <aria2c-proxy> 調用aria2c進行下載時的代理地址配置
+  -mt, --multi-thread 使用多線程下載
+  -p, --select-page <select-page> 選擇指定分p或分p範圍：(-p 8 或 -p 1,2 或 -p 3-5 或 -p ALL)
+  --audio-only 僅下載音頻
+  --video-only 僅下載視頻
+  --sub-only 僅下載字幕
+  --no-padding-page-num 不給分P序號補零
+  --debug 輸出調試日誌
+  --skip-mux 跳過混流步驟
+  --language <language> 設置混流的音頻語言(代碼)，如chi, jpn等
+  -token, --access-token <access-token> 設置access_token用以下載TV/APP接口的會員內容
+  --version Show version information
+  -?, -h, --help Show help and usage information
 
 Commands:
-  login      通過APP掃描二維碼以登錄您的WEB帳號
-  logintv    通過APP掃描二維碼以登錄您的TV帳號
+  login 通過APP掃描二維碼以登錄您的WEB賬號
+  logintv 通過APP掃描二維碼以登錄您的TV賬號
 ```
 
 # 功能
