@@ -72,6 +72,8 @@ Commands:
 - [x] 解析度將會自動加上至檔名
 - [x] 全自動執行(暫時透過 batch script 來實現)
 - [x] 可以批次下載
+- [x] 實現整段命令行參數在Config.json設置 (請參考 [BBDownAutoExtension](https://github.com/RyanL-29/BBDownAutoExtension))
+- [x] 真正全自動執行 (請參考 [BBDownAutoExtension](https://github.com/RyanL-29/BBDownAutoExtension))
 
 # 改善
 - [x] 除了影片分片外快取資料夾不會被剷除
@@ -83,8 +85,6 @@ Commands:
 - [ ] 支持更多自訂選項
 - [ ] 自動刷新cookie
 - [ ] 跟著主線更新
-- [ ] 實現整段命令行參數在Config.json設置
-- [ ] 真正全自動執行
 
 # 已知問題
 - [ ] 部分新番下載時會出現下載錯誤 (不會影響自動程序)
