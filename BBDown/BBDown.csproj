@@ -3,13 +3,22 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>net5.0</TargetFramework>
-    <Version>1.4.0</Version>
-    <Description>BBDown是一个免费且便捷高效的哔哩哔哩下载/解析软件.</Description>
+    <Version>0.0.7</Version>
+    <Description>BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟件 24/7 version</Description>
     <PackageProjectUrl>https://github.com/nilaoda/BBDown</PackageProjectUrl>
     <StartupObject></StartupObject>
     <PackAsTool>true</PackAsTool>
     <ToolCommandName>BBDown</ToolCommandName>
     <PackageOutputPath>./nupkg</PackageOutputPath>
+    <ApplicationIcon>aniiconw.ico</ApplicationIcon>
+    <PackageId>BBDown 24/7</PackageId>
+    <Authors>BBDown 24/7</Authors>
+    <Company>BBDown 24/7</Company>
+    <Product>BBDown 24/7</Product>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <Optimize>true</Optimize>
   </PropertyGroup>
 
   <ItemGroup>

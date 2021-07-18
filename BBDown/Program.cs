@@ -24,13 +24,13 @@ namespace BBDown
 {
     class Program
     {
-        public static string COOKIE { get; set; } = "";
+        public static string COOKIE = "";
         public static string TOKEN { get; set; } = "";
 
         public static Dictionary<string, string> qualitys = new Dictionary<string, string>() {
             {"126","DolbyVision" }, {"125","HDR" }, {"120","4K" }, {"116","1080P60" },
-            {"112","1080PHighBit" }, {"80","1080P" }, {"74","720P60" },
-            {"64","720PHighBit" }, {"48","720P" }, {"32","480P" }, {"16","360P" }
+            {"112","1080P" }, {"80","1080P" }, {"74","720P60" },
+            {"64","720P" }, {"48","720P" }, {"32","480P" }, {"16","360P" }
         };
 
         public static string APP_DIR = Path.GetDirectoryName(System.Diagnostics.Process.GetCurrentProcess().MainModule.FileName);
@@ -68,7 +68,6 @@ namespace BBDown
             public bool SkipMux { get; set; }
             public string SelectPage { get; set; } = "";
             public string Language { get; set; } = "";
-            public string Cookie { get; set; } = "";
             public string AccessToken { get; set; } = "";
             public string Aria2cProxy { get; set; } = "";
 
@@ -92,7 +91,6 @@ namespace BBDown
                     $"{nameof(NoPaddingPageNum)}={NoPaddingPageNum.ToString()}, " +
                     $"{nameof(Debug)}={Debug.ToString()}, " +
                     $"{nameof(SelectPage)}={SelectPage}, " +
-                    $"{nameof(Cookie)}={Cookie}, " +
                     $"{nameof(AccessToken)}={AccessToken}, " +
                     $"{nameof(Aria2cProxy)}={Aria2cProxy}}}";
             }
@@ -174,9 +172,6 @@ namespace BBDown
                 new Option<string>(
                     new string[]{ "--language"},
                     "設置混流的音訊語言(代碼)，如chi, jpn等"),
-                new Option<string>(
-                    new string[]{ "--cookie" ,"-c"},
-                    "設置字串cookie用以下載網頁介面的會員內容"),
                 new Option<string>(
                     new string[]{ "--access-token" ,"-token"},
                     "設置access_token用以下載TV/APP介面的會員內容")
@@ -337,7 +332,7 @@ namespace BBDown
             Console.BackgroundColor = ConsoleColor.DarkBlue;
             Console.ForegroundColor = ConsoleColor.White;
             var ver = System.Reflection.Assembly.GetExecutingAssembly().GetName().Version;
-            Console.Write($"BBDown version {ver.Major}.{ver.Minor}.{ver.Build}, Bilibili Downloader. 27/4 version \r\n");
+            Console.Write($"BBDown version {ver.Major}.{ver.Minor}.{ver.Build}, Bilibili Downloader. 24/7 version \r\n");
             Console.ResetColor();
             Console.Write("BBDown Server Edition");
             Console.WriteLine();
@@ -346,6 +341,7 @@ namespace BBDown
             {
                 await CheckUpdateAsync();
             }).Start();
+
             try
             {
                 //Read cookie from cookie.txt
@@ -355,8 +351,6 @@ namespace BBDown
                     File.Create($"{cookiePath}/cookie.txt");
                 }
                 string cookieString = File.ReadAllText($"{cookiePath}/cookie.txt");
-                if (cookieString != null) { cookieString = ""; }
-                LogDebug(cookieString);
                 bool interactMode = myOption.Interactive;
                 bool infoMode = myOption.OnlyShowInfo;
                 bool tvApi = myOption.UseTvApi;

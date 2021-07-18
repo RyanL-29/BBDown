@@ -170,9 +170,14 @@ namespace BBDown
             string htmlCode = string.Empty;
             try
             {
+                //讀取JSON存放
+                string jsonpath = Directory.GetCurrentDirectory();
+                string jsonfile = File.ReadAllText($"{jsonpath}/config.json");
+                var configjson = JsonDocument.Parse(jsonfile);
+                var UA = configjson.RootElement.GetProperty("UserAgent");
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
                 webRequest.Method = "GET";
-                webRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/78.0.3904.108 Safari/537.36";
+                webRequest.UserAgent = UA.ToString();
                 webRequest.Headers.Add("Accept-Encoding", "gzip, deflate");
                 webRequest.Headers.Add("Cookie", (url.Contains("/ep") || url.Contains("/ss")) ? Program.COOKIE + ";CURRENT_FNVAL=80;" : Program.COOKIE);
                 if (url.Contains("api.bilibili.com/pgc/player/web/playurl") || url.Contains("api.bilibili.com/pugv/player/web/playurl"))
