@@ -1,6 +1,6 @@
 [![img](https://img.shields.io/github/stars/RyanL-29/BBDown?label=%E7%82%B9%E8%B5%9E)](https://github.com/RyanL-29/BBDown)  [![img](https://img.shields.io/github/last-commit/RyanL-29/BBDown?label=%E6%9C%80%E8%BF%91%E6%8F%90%E4%BA%A4)](https://github.com/RyanL-29/BBDown)  [![img](https://img.shields.io/github/release/RyanL-29/BBDown?label=%E6%9C%80%E6%96%B0%E7%89%88%E6%9C%AC)](https://github.com/RyanL-29/BBDown/releases)  [![img](https://img.shields.io/github/license/RyanL-29/BBDown?label=%E8%AE%B8%E5%8F%AF%E8%AF%81)](https://github.com/RyanL-29/BBDown)
 
-# BBDown Server Edition (此版本並不能單獨使用, 需配合 [BBDownAutoExtension](https://github.com/RyanL-29/BBDownAutoExtension) , 放在同一資料夾一併使用)
+# BBDown Server Edition (此版本並不能單獨使用, 需配合 [BBDownAutoExtension](https://github.com/RyanL-29/BBDownAutoExtension))
 BBDown是一個免費且便捷高效的嗶哩嗶哩下載/解析軟體. 24/7 version (fork from BBDown)
 
 此版本適用於伺服器及Windwos Server 2019 NAS上面使用, 可以全自動運行
