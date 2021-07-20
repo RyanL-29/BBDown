@@ -93,7 +93,7 @@ namespace BBDown
                     $"{nameof(Debug)}={Debug.ToString()}, " +
                     $"{nameof(SelectPage)}={SelectPage}, " +
                     $"{nameof(AccessToken)}={AccessToken}, " +
-                    $"{nameof(Aria2cProxy)}={Aria2cProxy}}}" +
+                    $"{nameof(Aria2cProxy)}={Aria2cProxy}, " +
                     $"{nameof(Output)}={Output}}}";
             }
         }
