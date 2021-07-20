@@ -70,6 +70,7 @@ namespace BBDown
             public string Language { get; set; } = "";
             public string AccessToken { get; set; } = "";
             public string Aria2cProxy { get; set; } = "";
+            public string Output { get; set; } = "";
 
             public override string ToString()
             {
@@ -92,7 +93,8 @@ namespace BBDown
                     $"{nameof(Debug)}={Debug.ToString()}, " +
                     $"{nameof(SelectPage)}={SelectPage}, " +
                     $"{nameof(AccessToken)}={AccessToken}, " +
-                    $"{nameof(Aria2cProxy)}={Aria2cProxy}}}";
+                    $"{nameof(Aria2cProxy)}={Aria2cProxy}}}" +
+                    $"{nameof(Output)}={Output}}}";
             }
         }
 
@@ -174,7 +176,10 @@ namespace BBDown
                     "設置混流的音訊語言(代碼)，如chi, jpn等"),
                 new Option<string>(
                     new string[]{ "--access-token" ,"-token"},
-                    "設置access_token用以下載TV/APP介面的會員內容")
+                    "設置access_token用以下載TV/APP介面的會員內容"),
+                new Option<string>(
+                    new string[]{ "--output" ,"-o"},
+                    "設置分類資料夾")
             };
 
             Command loginCommand = new Command(
@@ -375,6 +380,7 @@ namespace BBDown
                 string aidOri = ""; //原始aid
                 COOKIE = cookieString;
                 TOKEN = myOption.AccessToken.Replace("access_token=", "");
+                string output = myOption.Output;
 
                 //audioOnly和videoOnly同時開啟則全部忽視
                 if (audioOnly && videoOnly)
@@ -599,7 +605,7 @@ namespace BBDown
 
                     //調用解析
                     (webJsonStr, videoTracks, audioTracks, clips, dfns) = ExtractTracks(onlyHevc, onlyAvc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, appApi);
-                    string outPath = dirname + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][0000P]{json.RootElement.GetProperty("suffix")}" +
+                    string outPath = dirname + (output != "" ? "/" + output : "") + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][0000P]{json.RootElement.GetProperty("suffix")}" +
                     $".mp4" : $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][0000P]{json.RootElement.GetProperty("suffix")}.mp4");
 
 
@@ -679,7 +685,7 @@ namespace BBDown
                         if (audioTracks.Count > 0)
                             LogColor($"[音訊] [{audioTracks[aIndex].codecs}] [{audioTracks[aIndex].bandwith} kbps] [~{FormatFileSize(audioTracks[aIndex].dur * audioTracks[aIndex].bandwith * 1024 / 8)}]", false);
 
-                        outPath = dirname + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][{videoTracks[vIndex].dfn}]{json.RootElement.GetProperty("suffix")}" +
+                        outPath = dirname + (output != "" ? "/" + output : "") + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][{videoTracks[vIndex].dfn}]{json.RootElement.GetProperty("suffix")}" +
                         $".mp4" : $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][{videoTracks[vIndex].dfn}]{json.RootElement.GetProperty("suffix")}.mp4");
 
                         if (File.Exists(outPath) && new FileInfo(outPath).Length != 0)
