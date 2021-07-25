@@ -106,7 +106,15 @@ namespace BBDown
                     if(File.Exists(subs[i].path) && File.ReadAllText(subs[i].path) != "")
                     {
                         inputArg.Append($" -i \"{subs[i].path}\" ");
-                        metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} -metadata:s:s:{i} title=\"{SubTitleDic[subs[i].lan]}\"");
+                        if (SubTitleDic[subs[i].lan] == "中文（簡轉繁）" || SubTitleDic[subs[i].lan] == "中文（繁體）")
+                        {
+                            metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} -metadata:s:s:{i} title=\"{SubTitleDic[subs[i].lan]}\" -disposition:s:s:{i} +default+forced ");
+                        }
+                        else
+                        {
+                            metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} -metadata:s:s:{i} title=\"{SubTitleDic[subs[i].lan]}\" ");
+                        }
+                        
                     }
                 }
                 if (files.Length > 0 && subs.Count < 1)
@@ -133,7 +141,7 @@ namespace BBDown
             //----分析完畢
             var arguments = $"-loglevel warning -y " +
                  inputArg.ToString() + metaArg.ToString() + $" -metadata title=\"" + titletcov + "\" " +
-                 (lang == "" ? "" : $"-metadata:s:a:0 language={lang} ") +
+                 (lang == "" ? "-metadata:s:a:0 language=jpn " : $"-metadata:s:a:0 language={lang} ") +
                  $"-metadata description=\"{desc}\" " +
                  $"-metadata album=\"{titletcov}\" " +
                  (audioOnly ? " -vn " : "") + (videoOnly ? " -an " : "") +

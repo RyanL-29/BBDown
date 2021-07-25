@@ -214,8 +214,8 @@ namespace BBDown
         public static Dictionary<string, string> SubDescDic = new Dictionary<string, string>
         {
             {"ar", "العربية"}, {"ar-eg", "العربية"},
-            {"bg", "български"}, {"cmn-hans", "國語 (簡體)"},
-            {"cmn-hant", "國語 (繁體)"}, {"cs", "čeština"},
+            {"bg", "български"}, {"cmn-hans", "國語（簡體）"},
+            {"cmn-hant", "國語（繁體）"}, {"cs", "čeština"},
             {"da", "Dansk"}, {"da-dk", "Dansk"},
             {"de", "Deutsch"}, {"de-de", "Deutsch"},
             {"el", "Ελληνικά"}, {"en", "English"},
@@ -261,7 +261,7 @@ namespace BBDown
             {"kk", "Қазақ тілі"}, {"is", "icelandic"},
             {"fil", "Pilipino"}, {"ku", "Kurdî"},
             {"ca", "català"}, {"no", "norsk språk"},
-            {"chs-cht", "簡轉繁"}
+            {"chs-cht", "中文（簡轉繁）"}
         };
 
         public static Dictionary<string, string> SubLangDic = new Dictionary<string, string> 
@@ -315,8 +315,8 @@ namespace BBDown
         public static Dictionary<string, string> SubTitleDic = new Dictionary<string, string>
         {
             {"ar", "العربية"}, {"ar-eg", "العربية"},
-            {"bg", "български"}, {"cmn-hans", "簡體 (國語)"},
-            {"cmn-hant", "繁體 (國語)"}, {"cs", "čeština"},
+            {"bg", "български"}, {"cmn-hans", "簡體（國語）"},
+            {"cmn-hant", "繁體（國語）"}, {"cs", "čeština"},
             {"da", "Dansk"}, {"da-dk", "Dansk"},
             {"de", "Deutsch"}, {"de-de", "Deutsch"},
             {"el", "Ελληνικά"}, {"en", "English"},
@@ -346,15 +346,15 @@ namespace BBDown
             {"tl", "Tagalog"}, {"tr", "Türkçe"},
             {"tr-tr", "Türkçe"}, {"uk", "Українська"},
             {"vi", "Tiếng Việt"}, {"zxx", "zxx"},
-            {"zh-hans", "中文（簡體)"},
-            {"zh-Hans", "中文（簡體)"},
-            {"zh-CN", "中文（簡體)"},
-            {"zh-TW", "中文（繁體)"},
-            {"zh-HK", "中文（繁體)"},
-            {"zh-MO", "中文（繁體)"},
-            {"zh-Hant", "中文（繁體)"},
-            {"zh-hant", "中文（繁體)"},
-            {"yue", "中文（粵語)"},
+            {"zh-hans", "中文（簡體）"},
+            {"zh-Hans", "中文（簡體）"},
+            {"zh-CN", "中文（簡體）"},
+            {"zh-TW", "中文（繁體）"},
+            {"zh-HK", "中文（繁體）"},
+            {"zh-MO", "中文（繁體）"},
+            {"zh-Hant", "中文（繁體）"},
+            {"zh-hant", "中文（繁體）"},
+            {"yue", "中文（粵語）"},
             {"hu", "Magyar"},
             {"et", "Eestlane"}, {"bn", "বাংলা ভাষার"},
             {"iw", "שפה עברית"}, {"sr", "српски језик"},
@@ -362,7 +362,7 @@ namespace BBDown
             {"kk", "Қазақ тілі"}, {"is", "icelandic"},
             {"fil", "Pilipino"}, {"ku", "Kurdî"},
             {"ca", "català"}, {"no", "norsk språk"},
-            {"chs-cht", "中文 (簡轉繁)"}
+            {"chs-cht", "中文（簡轉繁）"}
         };
     }
 }
