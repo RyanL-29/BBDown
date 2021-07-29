@@ -261,7 +261,7 @@ namespace BBDown
                                     sw.Write("SESSDATA=" + GetQueryString("SESSDATA", cc));
                                 }
                             }
-                            //File.WriteAllText(Path.Combine(APP_DIR, "BBDown.data"), cc.Substring(cc.IndexOf('?') + 1).Replace("&", ";"));
+                            File.WriteAllText(Path.Combine(APP_DIR, "BBDown.data"), cc.Substring(cc.IndexOf('?') + 1).Replace("&", ";"));
                             File.Delete("qrcode.png");
                             break;
                         }
