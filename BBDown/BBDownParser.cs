@@ -57,6 +57,7 @@ namespace BBDown
                 if (File.Exists($"cookie.txt"))
                 {
                     File.Delete($"{cookiePath}/cookie.txt");
+                    if (File.Exists($"BBDown.data")) { File.Delete($"{cookiePath}/BBDown.data"); }        
                     File.Create($"{cookiePath}/cookie.txt");
                     File.Create($"{cookiePath}/invalid_cookie.txt");
                 }
