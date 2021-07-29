@@ -57,13 +57,13 @@ namespace BBDown
                 if (File.Exists($"cookie.txt"))
                 {
                     File.Delete($"{cookiePath}/cookie.txt");
-                    if (File.Exists($"BBDown.data")) { File.Delete($"{cookiePath}/BBDown.data"); }        
+                    if (File.Exists($"BBDown.data")) { File.Delete($"{cookiePath}/cookie.txt"); }        
                     File.Create($"{cookiePath}/cookie.txt");
                     File.Create($"{cookiePath}/invalid_cookie.txt");
                 }
-                //string webUrl = "https://www.bilibili.com/bangumi/play/ep" + epId;
-                //string webSource = GetWebSource(webUrl);
-                //webJson = Regex.Match(webSource, @"window.__playinfo__=([\s\S]*?)<\/script>").Groups[1].Value;
+                string webUrl = "https://www.bilibili.com/bangumi/play/ep" + epId;
+                string webSource = GetWebSource(webUrl);
+                webJson = Regex.Match(webSource, @"window.__playinfo__=([\s\S]*?)<\/script>").Groups[1].Value;
             }
             return webJson;
         }
