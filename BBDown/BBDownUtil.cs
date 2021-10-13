@@ -1,6 +1,5 @@
 ﻿using ICSharpCode.SharpZipLib.GZip;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.IO;
@@ -13,7 +12,6 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using static BBDown.BBDownEntity;
@@ -23,7 +21,6 @@ namespace BBDown
 {
     class BBDownUtil
     {
-        private static readonly HttpClient httpClient = new();
         public static async Task CheckUpdateAsync()
         {
             try
@@ -68,7 +65,7 @@ namespace BBDown
                     {
                         epId = Regex.Match(input, "/ep(\\d{1,})").Groups[1].Value;
                     }
-                    else if (input.Contains("/ss"))
+                    else if(input.Contains("/ss"))
                     {
                         epId = GetEpidBySSId(Regex.Match(input, "/ss(\\d{1,})").Groups[1].Value);
                     }
@@ -180,10 +177,9 @@ namespace BBDown
                 var UA = configjson.RootElement.GetProperty("UserAgent");
                 HttpWebRequest webRequest = (HttpWebRequest)WebRequest.Create(url);
                 webRequest.Method = "GET";
-                webRequest.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/92.0.4515.159 Safari/537.36";
+                webRequest.UserAgent = UA.ToString();
                 webRequest.Headers.Add("Accept-Encoding", "gzip, deflate");
-                webRequest.Headers.Add("sec-ch-ua", "'Chromium';v='92', ' Not A;Brand';v='99', 'Google Chrome';v='92'");
-                webRequest.Headers.Add("Cookie", (url.Contains("/ep") || url.Contains("/ss")) ? Program.COOKIE + ";CURRENT_FNVAL=80;bsource=search_google;" : Program.COOKIE + ";bsource=search_google;");
+                webRequest.Headers.Add("Cookie", (url.Contains("/ep") || url.Contains("/ss")) ? Program.COOKIE + ";CURRENT_FNVAL=80;" : Program.COOKIE);
                 if (url.Contains("api.bilibili.com/pgc/player/web/playurl") || url.Contains("api.bilibili.com/pugv/player/web/playurl"))
                     webRequest.Headers.Add("Referer", "https://www.bilibili.com");
                 webRequest.CachePolicy = new HttpRequestCachePolicy(HttpRequestCacheLevel.NoCacheNoStore);
@@ -305,50 +301,6 @@ namespace BBDown
             return epId;
         }
 
-        private static async Task RangeDownloadToTmpAsync(int id, string url, string tmpName, long fromPosition, long? toPosition, Action<int, long, long> onProgress, bool failOnRangeNotSupported = false)
-        {
-            var lastTime = File.Exists(tmpName) ? new FileInfo(tmpName).LastWriteTimeUtc : DateTimeOffset.MinValue;
-            using (var fileStream = new FileStream(tmpName, FileMode.OpenOrCreate))
-            {
-                fileStream.Seek(0, SeekOrigin.End);
-                var downloadedBytes = fromPosition + fileStream.Position;
-
-                using var httpRequestMessage = new HttpRequestMessage();
-                if (!url.Contains("platform=android_tv_yst") && !url.Contains("platform=android"))
-                    httpRequestMessage.Headers.Add("Referer", "https://www.bilibili.com");
-                httpRequestMessage.Headers.Add("User-Agent", "Mozilla/5.0");
-                httpRequestMessage.Headers.Add("Cookie", Program.COOKIE);
-                httpRequestMessage.Headers.Range = new(downloadedBytes, toPosition);
-                httpRequestMessage.Headers.IfRange = new(lastTime);
-                httpRequestMessage.RequestUri = new(url);
-
-                using var response = (await httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead)).EnsureSuccessStatusCode();
-
-                if (response.StatusCode == HttpStatusCode.OK) // server doesn't response a partial content
-                {
-                    if (failOnRangeNotSupported && (downloadedBytes > 0 || toPosition != null)) throw new NotSupportedException("Range request is not supported.");
-                    downloadedBytes = 0;
-                    fileStream.Seek(0, SeekOrigin.Begin);
-                }
-
-                using var stream = await response.Content.ReadAsStreamAsync();
-                var totalBytes = downloadedBytes + (response.Content.Headers.ContentLength ?? long.MaxValue - downloadedBytes);
-
-                const int blockSize = 1048576 / 4;
-                var buffer = new byte[blockSize];
-
-                while (downloadedBytes < totalBytes)
-                {
-                    var recevied = await stream.ReadAsync(buffer);
-                    if (recevied == 0) break;
-                    await fileStream.WriteAsync(buffer.AsMemory(0, recevied));
-                    await fileStream.FlushAsync();
-                    downloadedBytes += recevied;
-                    onProgress(id, downloadedBytes - fromPosition, totalBytes);
-                }
-            }
-        }
-
         public static async Task DownloadFile(string url, string path, bool aria2c, string aria2cProxy)
         {
             LogDebug("Start downloading: {0}", url);
@@ -363,8 +315,24 @@ namespace BBDown
             string tmpName = Path.Combine(Path.GetDirectoryName(path), Path.GetFileNameWithoutExtension(path) + ".tmp");
             using (var progress = new ProgressBar())
             {
-                await RangeDownloadToTmpAsync(0, url, tmpName, 0, null, (_, downloaded, total) => progress.Report((double)downloaded / total));
-                File.Move(tmpName, path, true);
+                long totalLength = -1;
+                WebClient client = new WebClient();
+                if (!url.Contains("platform=android_tv_yst") && !url.Contains("platform=android"))
+                    client.Headers.Add("Referer", "https://www.bilibili.com");
+                client.Headers.Add("User-Agent", "Mozilla/5.0");
+                client.Headers.Add("Cookie", Program.COOKIE);
+                client.Credentials = CredentialCache.DefaultCredentials;
+                Uri uri = new Uri(url);
+                client.DownloadProgressChanged += delegate (object sender, DownloadProgressChangedEventArgs e)
+                {
+                    if (totalLength == -1) totalLength = e.TotalBytesToReceive;
+                    progress.Report((double)e.BytesReceived / e.TotalBytesToReceive);
+                };
+                await client.DownloadFileTaskAsync(uri, tmpName);
+                if (new FileInfo(tmpName).Length == totalLength)
+                    File.Move(tmpName, path, true);
+                else
+                    throw new Exception("文件下載可能不完整, 請重新下載");
             }
         }
 
@@ -399,40 +367,115 @@ namespace BBDown
                 Console.WriteLine();
                 return;
             }
-            long fileSize = await GetFileSizeAsync(url);
-            LogDebug("文件大小：{0} bytes", fileSize);
+            long fileSize = GetFileSize(url);
+            LogDebug("檔案大小：{0} bytes", fileSize);
             List<Clip> allClips = GetAllClips(url, fileSize);
             int total = allClips.Count;
-            LogDebug("分段数量：{0}", total);
-            ConcurrentDictionary<int, long> clipProgress = new();
-            foreach (var i in allClips) clipProgress[i.index] = 0;
-
+            LogDebug("分段數量：{0}", total);
+            long done = 0;
             using (var progress = new ProgressBar())
             {
                 progress.Report(0);
                 await RunWithMaxDegreeOfConcurrency(8, allClips, async clip =>
+                 {
+                 string tmp = Path.Combine(Path.GetDirectoryName(path), clip.index.ToString("00000") + "_" + Path.GetFileNameWithoutExtension(path) + (Path.GetExtension(path).EndsWith(".mp4") ? ".vclip" : ".aclip"));
+                     if (!(File.Exists(tmp) && new FileInfo(tmp).Length == clip.to - clip.from + 1))
+                     {
+                     reDown:
+                         try
+                         {
+                             using (var client = new HttpClient())
+                             {
+                                 client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0");
+                                 client.DefaultRequestHeaders.Add("Cookie", Program.COOKIE);
+                                 if (clip.to != -1)
+                                     client.DefaultRequestHeaders.Add("Range", $"bytes={clip.from}-{clip.to}");
+                                 else
+                                     client.DefaultRequestHeaders.Add("Range", $"bytes={clip.from}-");
+                                 if (!url.Contains("platform=android_tv_yst"))
+                                     client.DefaultRequestHeaders.Referrer = new Uri("https://www.bilibili.com");
+
+                                 var response = await client.GetAsync(url);
+
+                                 using (var stream = await response.Content.ReadAsStreamAsync())
+                                 {
+                                     using (var fileStream = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.None, 8192, true))
+                                     {
+                                         var buffer = new byte[8192];
+                                         int bytesRead;
+                                         while ((bytesRead = await stream.ReadAsync(buffer, 0, buffer.Length)) > 0)
+                                         {
+                                             await fileStream.WriteAsync(buffer, 0, bytesRead);
+                                             done += bytesRead;
+                                             progress.Report((double)done / fileSize);
+                                         }
+                                         //await stream.CopyToAsync(fileStream);
+                                     }
+                                 }
+                             }
+                         }
+                         catch { goto reDown; }
+                     }
+                     else
+                     {
+                         done += new FileInfo(tmp).Length;
+                         progress.Report((double)done / fileSize);
+                     }
+                 });
+                /*//多執行緒設置
+                ParallelOptions parallelOptions = new ParallelOptions
                 {
-                    int retry = 0;
+                    MaxDegreeOfParallelism = 8
+                };
+                Parallel.ForEach(allClips, parallelOptions, async clip =>
+                {
                     string tmp = Path.Combine(Path.GetDirectoryName(path), clip.index.ToString("00000") + "_" + Path.GetFileNameWithoutExtension(path) + (Path.GetExtension(path).EndsWith(".mp4") ? ".vclip" : ".aclip"));
-                reDown:
-                    try
+                    if (!(File.Exists(tmp) && new FileInfo(tmp).Length == clip.to - clip.from + 1))
                     {
-                        await RangeDownloadToTmpAsync(clip.index, url, tmp, clip.from, clip.to == -1 ? null : clip.to, (index, downloaded, _) =>
+                    reDown:
+                        try
                         {
-                            clipProgress[index] = downloaded;
-                            progress.Report((double)clipProgress.Values.Sum() / fileSize);
-                        }, true);
+                            *//*HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                            request.Timeout = 30000;
+                            request.ReadWriteTimeout = 30000; //重要
+                            request.AllowAutoRedirect = true;
+                            request.KeepAlive = false;
+                            request.Method = "GET";
+                            if (!url.Contains("platform=android_tv_yst"))
+                                request.Referer = "https://www.bilibili.com";
+                            request.UserAgent = "Mozilla/5.0";
+                            request.Headers.Add("Cookie", Program.COOKIE);
+                            if (clip.to != -1)
+                                request.AddRange("bytes", clip.from, clip.to);
+                            else
+                                request.AddRange("bytes", clip.from);
+                            using (var response = (HttpWebResponse)request.GetResponse())
+                            {
+                                using (var responseStream = response.GetResponseStream())
+                                {
+                                    using (var stream = new FileStream(tmp, FileMode.Create, FileAccess.Write, FileShare.Write))
+                                    {
+                                        byte[] bArr = new byte[1024];
+                                        int size = responseStream.Read(bArr, 0, (int)bArr.Length);
+                                        while (size > 0)
+                                        {
+                                            stream.Write(bArr, 0, size);
+                                            done += size;
+                                            progress.Report((double)done / fileSize);
+                                            size = responseStream.Read(bArr, 0, (int)bArr.Length);
+                                        }
+                                    }
+                                }
+                            }*//*
+                        }
+                        catch { goto reDown; }
                     }
-                    catch (NotSupportedException)
+                    else
                     {
-                        throw;
+                        done += new FileInfo(tmp).Length;
+                        progress.Report((double)done / fileSize);
                     }
-                    catch
-                    {
-                        if (++retry == 3) throw new Exception($"Failed to download clip {clip.index}");
-                        goto reDown;
-                    }
-                });
+                });*/
             }
         }
 
@@ -526,16 +569,14 @@ namespace BBDown
             return res;
         }
 
-        private static async Task<long> GetFileSizeAsync(string url)
+        private static long GetFileSize(string url)
         {
-            using var httpRequestMessage = new HttpRequestMessage();
-            if (!url.Contains("platform=android_tv_yst") && !url.Contains("platform=android"))
-                httpRequestMessage.Headers.Add("Referer", "https://www.bilibili.com");
-            httpRequestMessage.Headers.Add("User-Agent", "Mozilla/5.0");
-            httpRequestMessage.Headers.Add("Cookie", Program.COOKIE);
-            httpRequestMessage.RequestUri = new(url);
-            var response = (await httpClient.SendAsync(httpRequestMessage, HttpCompletionOption.ResponseHeadersRead)).EnsureSuccessStatusCode();
-            long totalSizeBytes = response.Content.Headers.ContentLength ?? 0;
+            WebClient webClient = new WebClient();
+            if (!url.Contains("platform=android_tv_yst"))
+                webClient.Headers.Add("Referer", "https://www.bilibili.com");
+            webClient.Headers.Add("User-Agent", "Mozilla/5.0");
+            webClient.OpenRead(url);
+            long totalSizeBytes = Convert.ToInt64(webClient.ResponseHeaders["Content-Length"]);
 
             return totalSizeBytes;
         }
@@ -577,7 +618,7 @@ namespace BBDown
             return title;
         }
 
-
+        
         /// <summary>    
         /// 獲取url字串參數，返回參數值字串    
         /// </summary>    
@@ -671,7 +712,7 @@ namespace BBDown
             string deviceId = GetRandomString(20);
             string buvid = GetRandomString(37);
             string fingerprint = $"{now.ToString("yyyyMMddHHmmssfff")}{GetRandomString(45)}";
-            sb.Add("appkey", "4409e2ce8ffd12b8");
+            sb.Add("appkey","4409e2ce8ffd12b8");
             sb.Add("auth_code", "");
             sb.Add("bili_local_id", deviceId);
             sb.Add("build", "102801");
