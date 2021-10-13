@@ -32,7 +32,7 @@ namespace BBDown
                         subtitle.lan = sub.GetProperty("key").ToString();
                         subtitle.path = $"temp/{aid}/{aid}.{cid}.{subtitle.lan}.srt";
                         subtitles.Add(subtitle);
-                        if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN")
+                        if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN" || subtitle.lan == "zh-Hant" || subtitle.lan == "zh-hant")
                         {
                             Log("now convert");
                             Subtitle subtitleb = new Subtitle();
