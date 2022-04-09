@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static BBDown.BBDownEntity;
 using static BBDown.BBDownUtil;
 
@@ -11,25 +12,25 @@ namespace BBDown
 {
     class BBDownIntlBangumiInfoFetcher : IFetcher
     {
-        public BBDownVInfo Fetch(string id)
+        public async Task<BBDownVInfo> FetchAsync(string id)
         {
             id = id.Substring(3);
             string index = "";
             //string api = $"https://api.global.bilibili.com/intl/gateway/ogv/m/view?ep_id={id}&s_locale=ja_JP";
-            string api = $"https://api.global.bilibili.com/intl/gateway/v2/ogv/view/app/season?ep_id={id}&platform=android&s_locale=zh_SG&mobi_app=bstar_a" + (Program.TOKEN != "" ? $"&access_key={Program.TOKEN}" : "");
-            string json = GetWebSource(api);
+            string api = $"https://api.bilibili.tv/intl/gateway/v2/ogv/view/app/season?ep_id={id}&platform=android&s_locale=zh_SG&mobi_app=bstar_a" + (Program.TOKEN != "" ? $"&access_key={Program.TOKEN}" : "");
+            string json = await GetWebSourceAsync(api);
             using var infoJson = JsonDocument.Parse(json);
             var result = infoJson.RootElement.GetProperty("result");
             string seasonId = result.GetProperty("season_id").ToString();
-            string cover = result.GetProperty("result").GetProperty("cover").ToString();
-            string title = result.GetProperty("result").GetProperty("title").ToString();
-            string desc = result.GetProperty("result").GetProperty("evaluate").ToString();
+            string cover = result.GetProperty("cover").ToString();
+            string title = result.GetProperty("title").ToString();
+            string desc = result.GetProperty("evaluate").ToString();
 
 
             if (cover == "")
             {
                 string animeUrl = $"https://bangumi.bilibili.com/anime/{seasonId}";
-                var web = GetWebSource(animeUrl);
+                var web = await GetWebSourceAsync(animeUrl);
                 if (web != "")
                 {
                     Regex regex = new Regex("window.__INITIAL_STATE__=([\\s\\S].*?);\\(function\\(\\)");
@@ -42,7 +43,11 @@ namespace BBDown
             }
 
             string pubTime = result.GetProperty("publish").GetProperty("pub_time").ToString();
-            var pages = result.GetProperty("episodes").ToString() != "" ? result.GetProperty("episodes").EnumerateArray().ToList() : new List<JsonElement>();
+            var pages = new List<JsonElement>();
+            if (result.TryGetProperty("episodes", out _))
+            {
+                pages = result.GetProperty("episodes").EnumerateArray().ToList();
+            }
             List<Page> pagesInfo = new List<Page>();
             int i = 1;
 

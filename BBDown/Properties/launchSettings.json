@@ -1,0 +1,9 @@
+{
+  "profiles": {
+    "BBDown": {
+      "commandName": "Project",
+      "commandLineArgs": "-p 1 -mt https://www.bilibili.com/bangumi/play/ss41459",
+      "workingDirectory": "C:\\Users\\faceb\\Documents\\source\\ANi_System\\test\\BBDown_Test"
+    }
+  }
+}

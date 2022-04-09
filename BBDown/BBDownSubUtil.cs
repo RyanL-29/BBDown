@@ -8,36 +8,46 @@ using static BBDown.BBDownLogger;
 using System.Text.RegularExpressions;
 using System.Text.Json;
 using System.Linq;
-using OpenCC.NET;
+using System.Threading.Tasks;
+using Fanhuaji_API;
 
 namespace BBDown
 {
     class BBDownSubUtil
     {
-        public static List<Subtitle> GetSubtitles(string aid, string cid, string epId, bool intl)
+        public static async Task<List<Subtitle>> GetSubtitlesAsync(string aid, string cid, string epId, bool intl)
         {
             List<Subtitle> subtitles = new List<Subtitle>();
             if (intl)
             {
                 try
                 {
-                    string api = $"https://app.global.bilibili.com/intl/gateway/v2/app/subtitle?&ep_id={epId}";
-                    string json = GetWebSource(api);
+                    string api = $"https://api.bilibili.tv/intl/gateway/web/v2/subtitle?&episode_id={epId}";
+                    string json = await GetWebSourceAsync(api);
                     using var infoJson = JsonDocument.Parse(json);
                     var subs = infoJson.RootElement.GetProperty("data").GetProperty("subtitles").EnumerateArray();
                     foreach (var sub in subs)
                     {
                         Subtitle subtitle = new Subtitle();
                         subtitle.url = sub.GetProperty("url").ToString();
-                        subtitle.lan = sub.GetProperty("key").ToString();
+                        subtitle.lan = sub.GetProperty("lang_key").ToString();
                         subtitle.path = $"temp/{aid}/{aid}.{cid}.{subtitle.lan}.srt";
                         subtitles.Add(subtitle);
                         if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN" || subtitle.lan == "zh-Hant" || subtitle.lan == "zh-hant")
                         {
-                            Log("now convert");
+                            Log("字幕修正中: 簡轉繁...");
                             Subtitle subtitleb = new Subtitle();
                             subtitleb.url = sub.GetProperty("url").ToString();
                             subtitleb.lan = "chs-cht";
+                            subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
+                            subtitles.Add(subtitleb);
+                        }
+                        if (subtitle.lan == "zh-hant" || subtitle.lan == "zh-Hant" || subtitle.lan == "cmn-hant" || subtitle.lan == "zh-TW" || subtitle.lan == "zh-HK" || subtitle.lan == "zh-MO")
+                        {
+                            Log("字幕修正中: 繁轉簡...");
+                            Subtitle subtitleb = new Subtitle();
+                            subtitleb.url = sub.GetProperty("url").ToString();
+                            subtitleb.lan = "cht-chs";
                             subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
                             subtitles.Add(subtitleb);
                         }
@@ -50,7 +60,7 @@ namespace BBDown
             try
             {
                 string api = $"https://api.bilibili.com/x/web-interface/view?aid={aid}&cid={cid}";
-                string json = GetWebSource(api);
+                string json = await GetWebSourceAsync(api);
                 using var infoJson = JsonDocument.Parse(json);
                 var subs = infoJson.RootElement.GetProperty("data").GetProperty("subtitle").GetProperty("list").EnumerateArray();
                 foreach (var sub in subs)
@@ -62,10 +72,19 @@ namespace BBDown
                     subtitles.Add(subtitle);
                     if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN" || subtitle.lan == "zh-Hant" || subtitle.lan == "zh-hant")
                     {
-                        Log("now convert");
+                        Log("字幕修正中: 簡轉繁...");
                         Subtitle subtitleb = new Subtitle();
                         subtitleb.url = sub.GetProperty("subtitle_url").ToString();
                         subtitleb.lan = "chs-cht";
+                        subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
+                        subtitles.Add(subtitleb);
+                    }
+                    if (subtitle.lan == "zh-hant" || subtitle.lan == "zh-Hant" || subtitle.lan == "cmn-hant" || subtitle.lan == "zh-TW" || subtitle.lan == "zh-HK" || subtitle.lan == "zh-MO")
+                    {
+                        Log("字幕修正中: 繁轉簡...");
+                        Subtitle subtitleb = new Subtitle();
+                        subtitleb.url = sub.GetProperty("subtitle_url").ToString();
+                        subtitleb.lan = "cht-chs";
                         subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
                         subtitles.Add(subtitleb);
                     }
@@ -73,7 +92,7 @@ namespace BBDown
                 //無字幕片源 但是字幕沒上導致的空列表，嘗試從國際介面獲取
                 if (subtitles.Count == 0)
                 {
-                    return GetSubtitles(aid, cid, epId, true);
+                    return await GetSubtitlesAsync(aid, cid, epId, true);
                 }
                 return subtitles;
             }
@@ -105,7 +124,7 @@ namespace BBDown
                     data[i++] = Convert.ToByte(_cid);
                     data[i++] = Convert.ToByte(3 << 3 | 0); // index=3
                     data[i++] = Convert.ToByte(_type);
-                    string t = GetPostResponse(api, data);
+                    string t = await GetPostResponseAsync(api, data);
                     Regex reg = new Regex("(zh-Han[st]).*?(http.*?\\.json)");
                     foreach (Match m in reg.Matches(t))
                     {
@@ -114,12 +133,21 @@ namespace BBDown
                         subtitle.lan = m.Groups[1].Value;
                         subtitle.path = $"temp/{aid}/{aid}.{cid}.{subtitle.lan}.srt";
                         subtitles.Add(subtitle);
-                        if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN")
+                        if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN" || subtitle.lan == "zh-Hant" || subtitle.lan == "zh-hant")
                         {
-                            Log("now convert");
+                            Log("字幕修正中: 簡轉繁...");
                             Subtitle subtitleb = new Subtitle();
                             subtitleb.url = m.Groups[2].Value;
                             subtitleb.lan = "chs-cht";
+                            subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
+                            subtitles.Add(subtitleb);
+                        }
+                        else if (subtitle.lan == "zh-hant" || subtitle.lan == "zh-Hant" || subtitle.lan == "cmn-hant" || subtitle.lan == "zh-TW" || subtitle.lan == "zh-HK" || subtitle.lan == "zh-MO")
+                        {
+                            Log("字幕修正中: 繁轉簡...");
+                            Subtitle subtitleb = new Subtitle();
+                            subtitleb.url = m.Groups[2].Value;
+                            subtitleb.lan = "cht-chs";
                             subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
                             subtitles.Add(subtitleb);
                         }
@@ -130,15 +158,18 @@ namespace BBDown
             }
         }
 
-        public static void SaveSubtitle(string url, string path)
+        public static async Task SaveSubtitleAsync(string url, string path)
         {
             if (path.Contains("chs-cht") == true)
             {
-                File.WriteAllText(path, ConvertSubFromJsonCHSCHT(GetWebSource(url)), new UTF8Encoding());
+                File.WriteAllText(path, await ConvertSubFromJsonCHSCHT(await GetWebSourceAsync(url)), new UTF8Encoding());
+            }
+            else if (path.Contains("cht-chs") == true) {
+                File.WriteAllText(path, await ConvertSubFromJsonCHTCHS(await GetWebSourceAsync(url)), new UTF8Encoding());
             }
             else
             {
-                File.WriteAllText(path, ConvertSubFromJson(GetWebSource(url)), new UTF8Encoding());
+                File.WriteAllText(path, ConvertSubFromJson(await GetWebSourceAsync(url)), new UTF8Encoding());
             }
         }
 
@@ -169,12 +200,50 @@ namespace BBDown
             return lines.ToString();
         }
 
-        private static string ConvertSubFromJsonCHSCHT(string jsonString)
+        private static async Task<string> ConvertSubFromJsonCHSCHT(string jsonString)
         {
-            var converter = new OpenChineseConverter();
-            string jsonString2 = converter.ToTaiwanFromSimplifiedWithPhrases(jsonString);
+            //Old Open-CC
+            //var converter = new OpenChineseConverter();
+            //string jsonString2 = converter.ToTaiwanFromSimplifiedWithPhrases(jsonString);
+
+            //Fanhuaji-API
+            var Fanhuaji = new Fanhuaji(Agree: true, Terms_of_Service: Fanhuaji_API.Fanhuaji.Terms_of_Service);
+            var subObj = await Fanhuaji.ConvertAsync(jsonString, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
             StringBuilder lines = new StringBuilder();
-            var json = JsonDocument.Parse(jsonString2);
+            var json = JsonDocument.Parse(subObj.Data.Text);
+            var sub = json.RootElement.GetProperty("body").EnumerateArray().ToList();
+            for (int i = 0; i < sub.Count; i++)
+            {
+                var line = sub[i];
+                lines.AppendLine((i + 1).ToString());
+                JsonElement from;
+                JsonElement content;
+                if (line.TryGetProperty("from", out from))
+                {
+                    lines.AppendLine($"{FormatTime(from.ToString())} --> {FormatTime(line.GetProperty("to").ToString())}");
+                }
+                else
+                {
+                    lines.AppendLine($"{FormatTime("0")} --> {FormatTime(line.GetProperty("to").ToString())}");
+                }
+                //有的沒有內容
+                if (line.TryGetProperty("content", out content))
+                    lines.AppendLine(content.ToString());
+                lines.AppendLine();
+            }
+            return lines.ToString();
+        }
+
+        private static async Task<string> ConvertSubFromJsonCHTCHS(string jsonString)
+        {   //Old Open-CC
+            //var converter = new OpenChineseConverter();
+            //string jsonString2 = converter.ToSimplifiedFromTraditional(jsonString);
+            
+            //Fanhuaji-API
+            var Fanhuaji = new Fanhuaji(Agree: true, Terms_of_Service: Fanhuaji_API.Fanhuaji.Terms_of_Service);
+            var subObj = await Fanhuaji.ConvertAsync(jsonString, Fanhuaji_API.Enum.Enum_Converter.China, new Config() { });
+            StringBuilder lines = new StringBuilder();
+            var json = JsonDocument.Parse(subObj.Data.Text);
             var sub = json.RootElement.GetProperty("body").EnumerateArray().ToList();
             for (int i = 0; i < sub.Count; i++)
             {
@@ -261,7 +330,7 @@ namespace BBDown
             {"kk", "Қазақ тілі"}, {"is", "icelandic"},
             {"fil", "Pilipino"}, {"ku", "Kurdî"},
             {"ca", "català"}, {"no", "norsk språk"},
-            {"chs-cht", "中文（簡轉繁）"}
+            {"chs-cht", "中文（簡轉繁）"}, {"cht-chs", "中文（繁轉簡）"}
         };
 
         public static Dictionary<string, string> SubLangDic = new Dictionary<string, string> 
@@ -309,7 +378,8 @@ namespace BBDown
             {"kk", "kaz"}, {"is", "ice"},
             {"fil", "phi"}, {"ku", "kur"},
             {"ca", "cat"}, {"no", "nor"},
-            {"hu", "hun"},{"chs-cht", "chi"}
+            {"hu", "hun"},{"chs-cht", "chi"},
+            {"cht-chs", "chi"}
         };
 
         public static Dictionary<string, string> SubTitleDic = new Dictionary<string, string>
@@ -362,7 +432,7 @@ namespace BBDown
             {"kk", "Қазақ тілі"}, {"is", "icelandic"},
             {"fil", "Pilipino"}, {"ku", "Kurdî"},
             {"ca", "català"}, {"no", "norsk språk"},
-            {"chs-cht", "中文（簡轉繁）"}
+            {"chs-cht", "中文（簡轉繁）"}, {"cht-chs", "中文（繁轉簡）"}
         };
     }
 }

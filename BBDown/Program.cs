@@ -17,8 +17,9 @@ using static BBDown.BBDownMuxer;
 using System.Text;
 using System.Linq;
 using System.Text.Json;
+using System.Net.Http;
 using System.Text.RegularExpressions;
-using OpenCC.NET;
+using Fanhuaji_API;
 
 namespace BBDown
 {
@@ -28,7 +29,7 @@ namespace BBDown
         public static string TOKEN { get; set; } = "";
 
         public static Dictionary<string, string> qualitys = new Dictionary<string, string>() {
-            {"126","DolbyVision" }, {"125","HDR" }, {"120","4K" }, {"116","1080P60" },
+            {"127","8K" }, {"126","DolbyVision" }, {"125","HDR" }, {"120","4K" }, {"116","1080P60" },
             {"112","1080P" }, {"80","1080P" }, {"74","720P60" },
             {"64","720P" }, {"48","720P" }, {"32","480P" }, {"16","360P" }
         };
@@ -194,13 +195,13 @@ namespace BBDown
             rootCommand.TreatUnmatchedTokensAsErrors = true;
 
             //WEB登錄
-            loginCommand.Handler = CommandHandler.Create(delegate
+            loginCommand.Handler = CommandHandler.Create(async delegate
             {
                 try
                 {
                     Log("獲取登錄地址...");
                     string loginUrl = "https://passport.bilibili.com/qrcode/getLoginUrl";
-                    string url = JsonDocument.Parse(GetWebSource(loginUrl)).RootElement.GetProperty("data").GetProperty("url").ToString();
+                    string url = JsonDocument.Parse(await GetWebSourceAsync(loginUrl)).RootElement.GetProperty("data").GetProperty("url").ToString();
                     string oauthKey = GetQueryString("oauthKey", url);
                     //Log(oauthKey);
                     //Log(url);
@@ -214,8 +215,8 @@ namespace BBDown
                     Log("生成二維碼成功：qrcode.png, 請打開並掃描");
                     while (true)
                     {
-                        Thread.Sleep(1000);
-                        string w = GetLoginStatus(oauthKey);
+                        await Task.Delay(1000);
+                        string w = await GetLoginStatusAsync(oauthKey);
                         string data = JsonDocument.Parse(w).RootElement.GetProperty("data").ToString();
                         if (data == "-2")
                         {
@@ -271,7 +272,7 @@ namespace BBDown
             });
 
             //TV登錄
-            loginTVCommand.Handler = CommandHandler.Create(delegate
+            loginTVCommand.Handler = CommandHandler.Create(async delegate
             {
                 try
                 {
@@ -280,7 +281,7 @@ namespace BBDown
                     var parms = GetTVLoginParms();
                     Log("獲取登錄地址...");
                     WebClient webClient = new WebClient();
-                    byte[] responseArray = webClient.UploadValues(loginUrl, parms);
+                    byte[] responseArray = await (await AppHttpClient.PostAsync(loginUrl, new FormUrlEncodedContent(parms.ToDictionary()))).Content.ReadAsByteArrayAsync();
                     string web = Encoding.UTF8.GetString(responseArray);
                     string url = JsonDocument.Parse(web).RootElement.GetProperty("data").GetProperty("url").ToString();
                     string authCode = JsonDocument.Parse(web).RootElement.GetProperty("data").GetProperty("auth_code").ToString();
@@ -297,8 +298,8 @@ namespace BBDown
                     parms.Add("sign", GetSign(ToQueryString(parms)));
                     while (true)
                     {
-                        Thread.Sleep(1000);
-                        responseArray = webClient.UploadValues(pollUrl, parms);
+                        await Task.Delay(1000);
+                        responseArray = await (await AppHttpClient.PostAsync(pollUrl, new FormUrlEncodedContent(parms.ToDictionary()))).Content.ReadAsByteArrayAsync();
                         web = Encoding.UTF8.GetString(responseArray);
                         string code = JsonDocument.Parse(web).RootElement.GetProperty("code").ToString();
                         if (code == "86038")
@@ -341,6 +342,8 @@ namespace BBDown
             Console.ResetColor();
             Console.Write("BBDown Server Edition");
             Console.WriteLine();
+            //Fanhuaji-API
+            var Fanhuaji = new Fanhuaji(Agree: true, Terms_of_Service: Fanhuaji_API.Fanhuaji.Terms_of_Service);
             //檢測更新
             new Thread(async () =>
             {
@@ -476,7 +479,7 @@ namespace BBDown
                 {
                     fetcher = new BBDownSpaceVideoFetcher();
                 }
-                var vInfo = fetcher.Fetch(aidOri);
+                var vInfo = await fetcher.FetchAsync(aidOri);
                 string title = vInfo.Title;
                 string desc = vInfo.Desc;
                 string pic = vInfo.Pic;
@@ -550,12 +553,12 @@ namespace BBDown
                         else 
                         {
                             LogDebug("獲取字幕...");
-                            subtitleInfo = BBDownSubUtil.GetSubtitles(p.aid, p.cid, p.epid, intlApi);
+                            subtitleInfo = await BBDownSubUtil.GetSubtitlesAsync(p.aid, p.cid, p.epid, intlApi);
                             foreach (Subtitle s in subtitleInfo)
                             {
                                 Log($"下載字幕 {s.lan} => {BBDownSubUtil.SubDescDic[s.lan]}...");
                                 LogDebug("下載：{0}", s.url);
-                                BBDownSubUtil.SaveSubtitle(s.url, s.path);
+                                await BBDownSubUtil.SaveSubtitleAsync(s.url, s.path);
                                 if (subOnly && File.Exists(s.path) && File.ReadAllText(s.path) != "")
                                 {
                                     string _indexStr = p.index.ToString("0".PadRight(pagesInfo.OrderByDescending(_p => _p.index).First().index.ToString().Length, '0'));
@@ -592,8 +595,8 @@ namespace BBDown
                     string audioPath = $"temp/{p.aid}/{p.aid}.P{indexStr}.{p.cid}.m4a";
                     //處理文件夾以.結尾導致的異常情況
                     if (title.EndsWith(".")) title += "_fix";
-                    var converter = new OpenChineseConverter();
-                    title = converter.ToTaiwanFromSimplified(title);
+                    var titleObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
+                    title = titleObj.Data.Text;
                     Log(title);
                     string ep = p.index.ToString("D2");
                     //讀取JSON存放
@@ -604,7 +607,7 @@ namespace BBDown
                     title = Regex.Replace(title, @"[<>:""/\\|?*]", "-");
 
                     //調用解析
-                    (webJsonStr, videoTracks, audioTracks, clips, dfns) = ExtractTracks(onlyHevc, onlyAvc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, appApi);
+                    (webJsonStr, videoTracks, audioTracks, clips, dfns) = await ExtractTracksAsync(onlyHevc, onlyAvc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, appApi);
                     string outPath = dirname + (output != "" ? "/" + output : "") + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][0000P]{json.RootElement.GetProperty("suffix")}" +
                     $".mp4" : $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][0000P]{json.RootElement.GetProperty("suffix")}.mp4");
 
@@ -744,7 +747,7 @@ namespace BBDown
                         if (audioTracks.Count == 0) audioPath = "";
                         if (skipMux) continue;
                         Log("開始合併影音" + (subtitleInfo.Count > 0 ? "和字幕" : "") + "...");
-                        int code = MuxAV(useMp4box, videoPath, audioPath, outPath,
+                        int code = await MuxAV(useMp4box, videoPath, audioPath, outPath,
                             desc,
                             title,
                             vInfo.PagesInfo.Count > 1 ? ($"P{indexStr}.{p.title}") : "",
@@ -777,7 +780,7 @@ namespace BBDown
                             if (vIndex > dfns.Count || vIndex < 0) vIndex = 0;
                             Console.ResetColor();
                             //重新解析
-                            (webJsonStr, videoTracks, audioTracks, clips, dfns) = ExtractTracks(onlyHevc, onlyAvc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, appApi, dfns[vIndex]);
+                            (webJsonStr, videoTracks, audioTracks, clips, dfns) = await ExtractTracksAsync(onlyHevc, onlyAvc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, appApi, dfns[vIndex]);
                             flag = true;
                             videoTracks.Clear();
                             goto reParse;
@@ -834,7 +837,7 @@ namespace BBDown
                         MergeFLV(files, videoPath);
                         if (skipMux) continue;
                         Log("開始混流影片" + (subtitleInfo.Count > 0 ? "和字幕" : "") + "...");
-                        int code = MuxAV(false, videoPath, "", outPath,
+                        int code = await MuxAV(false, videoPath, "", outPath,
                             desc,
                             title,
                             vInfo.PagesInfo.Count > 1 ? ($"P{indexStr}.{p.title}") : "",

@@ -10,12 +10,14 @@ namespace BBDown
 
         public static void Log(object text, bool enter = true)
         {
+            Console.OutputEncoding = Encoding.UTF8;
             Console.Write(DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]") + " - " + text);
             if (enter) Console.WriteLine();
         }
 
         public static void LogError(object text)
         {
+            Console.OutputEncoding = Encoding.UTF8;
             Console.Write(DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]") + " - ");
             Console.ForegroundColor = ConsoleColor.Red;
             Console.Write(text);
@@ -25,6 +27,7 @@ namespace BBDown
 
         public static void LogColor(object text, bool time = true)
         {
+            Console.OutputEncoding = Encoding.UTF8;
             if (time)
                 Console.Write(DateTime.Now.ToString("[yyyy-MM-dd HH:mm:ss.fff]") + " - ");
             Console.ForegroundColor = ConsoleColor.Cyan;
@@ -38,6 +41,7 @@ namespace BBDown
 
         public static void LogDebug(string toFormat, params object[] args)
         {
+            Console.OutputEncoding = Encoding.UTF8;
             if (DEBUG_LOG)
             {
                 Console.ForegroundColor = ConsoleColor.DarkGray;

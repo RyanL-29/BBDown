@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static BBDown.BBDownEntity;
 using static BBDown.BBDownUtil;
 using static BBDown.BBDownSubUtil;
 using static BBDown.BBDownLogger;
 using System.IO;
-using OpenCC.NET;
+using Fanhuaji_API;
 
 namespace BBDown
 {
@@ -76,8 +77,10 @@ namespace BBDown
             return RunExe("mp4box", arguments);
         }
 
-        public static int MuxAV(bool useMp4box, string videoPath, string audioPath, string outPath, string desc = "", string title = "", string episodeId = "", string pic = "", string lang = "", List<Subtitle> subs = null, bool audioOnly = false, bool videoOnly = false, string aid = "", string cid = "")
+        public static async Task<int> MuxAV(bool useMp4box, string videoPath, string audioPath, string outPath, string desc = "", string title = "", string episodeId = "", string pic = "", string lang = "", List<Subtitle> subs = null, bool audioOnly = false, bool videoOnly = false, string aid = "", string cid = "")
         {
+            //Fanhuaji-API
+            var Fanhuaji = new Fanhuaji(Agree: true, Terms_of_Service: Fanhuaji_API.Fanhuaji.Terms_of_Service);
             desc = EscapeString(desc);
             title = EscapeString(title);
             episodeId = EscapeString(episodeId);
@@ -134,15 +137,19 @@ namespace BBDown
             {
                 inputArg.Append($" -map {i} ");
             }
-            var converter = new OpenChineseConverter();
-            string titletcov = converter.ToTaiwanFromSimplifiedWithPhrases(title);
-            titletcov = titletcov.Remove(titletcov.IndexOf("（"));
-            string desccov = converter.ToTaiwanFromSimplifiedWithPhrases(desc);
+            var titletcovObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
+            var titletcov = titletcovObj.Data.Text;
+            int isAreaTitle = titletcov.IndexOf("（");
+            if (isAreaTitle != -1) {
+                titletcov = titletcov.Remove(isAreaTitle);
+            }
+            var desccovObj = await Fanhuaji.ConvertAsync(desc, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
+            string desccov = desccovObj.Data.Text;
             //----分析完畢
             var arguments = $"-loglevel warning -y " +
                  inputArg.ToString() + metaArg.ToString() + $" -metadata title=\"" + titletcov + "\" " +
                  (lang == "" ? "-metadata:s:a:0 language=jpn " : $"-metadata:s:a:0 language={lang} ") +
-                 $"-metadata description=\"{desc}\" " +
+                 $"-metadata description=\"{desccov}\" " +
                  $"-metadata album=\"{titletcov}\" " +
                  (audioOnly ? " -vn " : "") + (videoOnly ? " -an " : "") +
                  $"-c copy " +

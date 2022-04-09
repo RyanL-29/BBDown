@@ -8,16 +8,17 @@ using static BBDown.BBDownLogger;
 using static BBDown.BBDownEntity;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace BBDown
 {
     class BBDownParser
     {
-        private static string GetPlayJson(bool onlyAvc, string aidOri, string aid, string cid, string epId, bool tvApi, bool intl, bool appApi, string qn = "0")
+        private static async Task<string> GetPlayJsonAsync(bool onlyAvc, string aidOri, string aid, string cid, string epId, bool tvApi, bool intl, bool appApi, string qn = "0")
         {
             LogDebug("aid={0},cid={1},epId={2},tvApi={3},IntlApi={4},appApi={5},qn={6}", aid, cid, epId, tvApi, intl, appApi, qn);
 
-            if (intl) return GetPlayJson(aid, cid, epId, qn);
+            if (intl) return await GetPlayJsonAsync(aid, cid, epId, qn);
 
 
             bool cheese = aidOri.StartsWith("cheese:");
@@ -49,7 +50,7 @@ namespace BBDown
             if (cheese) api = api.Replace("/pgc/", "/pugv/");
 
             //Console.WriteLine(api);
-            string webJson = GetWebSource(api);
+            string webJson = await GetWebSourceAsync(api);
             //以下情況從網頁原始碼嘗試解析
             if (webJson.Contains("\"大会员专享限制\""))
             {
@@ -68,15 +69,15 @@ namespace BBDown
             return webJson;
         }
 
-        private static string GetPlayJson(string aid, string cid, string epId, string qn)
+        private static async Task<string> GetPlayJsonAsync(string aid, string cid, string epId, string qn)
         {
-            string api = $"https://api.global.bilibili.com/intl/gateway/v2/ogv/playurl?" +
+            string api = $"https://api.bilibili.tv/intl/gateway/v2/ogv/playurl?" +
                 $"aid={aid}&appkey=7d089525d3611b1c&build=1000310&c_locale=&channel=master&cid={cid}&ep_id={epId}&force_host=0&fnvalfnval=80&fnver=0&fourk=1&lang=hans&locale=zh_CN&mobi_app=bstar_a&platform=android&prefer_code_type=0&qn={qn}&timezone=GMT+08:00&ts={GetTimeStamp(true)}" + (Program.TOKEN != "" ? $"&access_key={Program.TOKEN}" : "");
-            string webJson = GetWebSource(api);
+            string webJson = await GetWebSourceAsync(api);
             return webJson;
         }
 
-        public static (string, List<Video>, List<Audio>, List<string>, List<string>) ExtractTracks(bool onlyHevc, bool onlyAvc, string aidOri, string aid, string cid, string epId, bool tvApi, bool intlApi, bool appApi, string qn = "0")
+        public static async Task<(string, List<Video>, List<Audio>, List<string>, List<string>)> ExtractTracksAsync(bool onlyHevc, bool onlyAvc, string aidOri, string aid, string cid, string epId, bool tvApi, bool intlApi, bool appApi, string qn = "0")
         {
             List<Video> videoTracks = new List<Video>();
             List<Audio> audioTracks = new List<Audio>();
@@ -84,7 +85,7 @@ namespace BBDown
             List<string> dfns = new List<string>();
 
             //調用解析
-            string webJsonStr = GetPlayJson(onlyAvc, aidOri, aid, cid, epId, tvApi, intlApi, appApi);
+            string webJsonStr = await GetPlayJsonAsync(onlyAvc, aidOri, aid, cid, epId, tvApi, intlApi, appApi);
 
             var respJson = JsonDocument.Parse(webJsonStr);
             var data = respJson.RootElement;
@@ -107,8 +108,7 @@ namespace BBDown
                             v.dfn = Program.qualitys[v.id];
                             v.bandwith = Convert.ToInt64(dashVideo.GetProperty("bandwidth").ToString()) / 1000;
                             v.baseUrl = dashVideo.GetProperty("base_url").ToString();
-                            v.codecs = dashVideo.GetProperty("codecid").ToString() == "12" ? "HEVC" : "AVC";
-                            if (onlyHevc && v.codecs == "AVC") continue;
+                            v.codecs = GetVideoCodec(dashVideo.GetProperty("codecid").ToString());
                             if (!videoTracks.Contains(v)) videoTracks.Add(v);
                         }
                     }
@@ -147,7 +147,7 @@ namespace BBDown
             reParse:
                 if (reParse)
                 {
-                    webJsonStr = GetPlayJson(onlyAvc, aidOri, aid, cid, epId, tvApi, intlApi, appApi, GetMaxQn());
+                    webJsonStr = await GetPlayJsonAsync(onlyAvc, aidOri, aid, cid, epId, tvApi, intlApi, appApi, GetMaxQn());
                     respJson = JsonDocument.Parse(webJsonStr);
                 }
                 try { video = !tvApi ? respJson.RootElement.GetProperty(nodeName).GetProperty("dash").GetProperty("video").EnumerateArray().ToList() : respJson.RootElement.GetProperty("dash").GetProperty("video").EnumerateArray().ToList(); } catch { }
@@ -199,7 +199,7 @@ namespace BBDown
             else if (webJsonStr.Contains("\"durl\":[")) //flv
             {
                 //默認以最高清晰度解析
-                webJsonStr = GetPlayJson(onlyAvc, aidOri, aid, cid, epId, tvApi, intlApi, appApi, GetMaxQn());
+                webJsonStr = await GetPlayJsonAsync(onlyAvc, aidOri, aid, cid, epId, tvApi, intlApi, appApi, GetMaxQn());
                 respJson = JsonDocument.Parse(webJsonStr);
                 string quality = "";
                 string videoCodecid = "";

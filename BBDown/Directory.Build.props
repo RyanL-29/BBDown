@@ -3,8 +3,6 @@
   <PropertyGroup>
     <IlcOptimizationPreference>Speed</IlcOptimizationPreference>
     <IlcFoldIdenticalMethodBodies>true</IlcFoldIdenticalMethodBodies>
-    <StaticallyLinked Condition="$(RuntimeIdentifier.StartsWith('win'))">true</StaticallyLinked>
-    <TrimMode>Link</TrimMode>
   </PropertyGroup>
 
   <ItemGroup>
