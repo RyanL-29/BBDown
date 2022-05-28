@@ -109,23 +109,27 @@ namespace BBDown
                     if(File.Exists(subs[i].path) && File.ReadAllText(subs[i].path) != "")
                     {
                         inputArg.Append($" -i \"{subs[i].path}\" ");
-                        if (SubTitleDic[subs[i].lan] == "中文（簡轉繁）" || SubTitleDic[subs[i].lan] == "中文（繁體）")
-                        {
-                            metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} -metadata:s:s:{i} title=\"{SubTitleDic[subs[i].lan]}\" -disposition:s:s:{i} +default+forced ");
-                        }
-                        else
-                        {
-                            metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} -metadata:s:s:{i} title=\"{SubTitleDic[subs[i].lan]}\" ");
-                        }
+                        metaArg.Append($" -metadata:s:s:{i} handler_name=\"{SubDescDic[subs[i].lan]}\" -metadata:s:s:{i} language={SubLangDic[subs[i].lan]} -metadata:s:s:{i} title=\"{SubTitleDic[subs[i].lan]}\" ");
                         
                     }
                 }
                 if (files.Length > 0 && subs.Count < 1)
                 {
-                    Log("正在合併現有字幕...");
+                    Log("字幕已經存在, 正在合併現有字幕...");
                     for (int e = 0; e < files.Length; e++)
                     {
+                        string handler_name = SubDescDic["zh-TW"];
+                        string language = SubLangDic["zh-TW"];
+                        string sub_title = SubTitleDic["zh-TW"];
+                        string[] fileName = files[e].Split(".");
+                        if (fileName.Length > 0)
+                        {
+                            handler_name = SubDescDic[fileName[2]];
+                            language = SubLangDic[fileName[2]];
+                            sub_title = SubTitleDic[fileName[2]];
+                        }
                         inputArg.Append($" -i \"{files[e]}\" ");
+                        metaArg.Append($" -metadata:s:s:{e} handler_name=\"{handler_name}\" -metadata:s:s:{e} language={language} -metadata:s:s:{e} title=\"{sub_title}\" ");
                     }
 
                 }
