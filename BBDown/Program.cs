@@ -597,7 +597,6 @@ namespace BBDown
                     if (title.EndsWith(".")) title += "_fix";
                     var titleObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
                     title = titleObj.Data.Text;
-                    Log(title);
                     string ep = p.index.ToString("D2");
                     //讀取JSON存放
                     string jsonpath = Directory.GetCurrentDirectory();
@@ -608,8 +607,8 @@ namespace BBDown
 
                     //調用解析
                     (webJsonStr, videoTracks, audioTracks, clips, dfns) = await ExtractTracksAsync(onlyHevc, onlyAvc, aidOri, p.aid, p.cid, p.epid, tvApi, intlApi, appApi);
-                    string outPath = dirname + (output != "" ? "/" + output : "") + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][0000P]{json.RootElement.GetProperty("suffix")}" +
-                    $".mp4" : $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][0000P]{json.RootElement.GetProperty("suffix")}.mp4");
+                    string outPath = dirname + (output != "" ? "/" + output : "") + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title} - {ep} [0000P]{json.RootElement.GetProperty("suffix")}" +
+                    $".mp4" : $"/{json.RootElement.GetProperty("prefix")}{title} - {ep} [0000P]{json.RootElement.GetProperty("suffix")}.mp4");
 
 
                     //此處代碼簡直災難，後續最佳化吧
@@ -688,8 +687,8 @@ namespace BBDown
                         if (audioTracks.Count > 0)
                             LogColor($"[音訊] [{audioTracks[aIndex].codecs}] [{audioTracks[aIndex].bandwith} kbps] [~{FormatFileSize(audioTracks[aIndex].dur * audioTracks[aIndex].bandwith * 1024 / 8)}]", false);
 
-                        outPath = dirname + (output != "" ? "/" + output : "") + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][{videoTracks[vIndex].dfn}]{json.RootElement.GetProperty("suffix")}" +
-                        $".mp4" : $"/{json.RootElement.GetProperty("prefix")}{title}[{ep}][{videoTracks[vIndex].dfn}]{json.RootElement.GetProperty("suffix")}.mp4");
+                        outPath = dirname + (output != "" ? "/" + output : "") + (pagesInfo.Count > 1 ? $"/{json.RootElement.GetProperty("prefix")}{title} - {ep} [{videoTracks[vIndex].dfn}]{json.RootElement.GetProperty("suffix")}" +
+                        $".mp4" : $"/{json.RootElement.GetProperty("prefix")}{title} - {ep} [{videoTracks[vIndex].dfn}]{json.RootElement.GetProperty("suffix")}.mp4");
 
                         if (File.Exists(outPath) && new FileInfo(outPath).Length != 0)
                         {
