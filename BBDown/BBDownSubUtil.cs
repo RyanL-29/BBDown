@@ -90,10 +90,10 @@ namespace BBDown
                     }
                 }
                 //無字幕片源 但是字幕沒上導致的空列表，嘗試從國際介面獲取
-                if (subtitles.Count == 0)
-                {
-                    return await GetSubtitlesAsync(aid, cid, epId, true);
-                }
+                //if (subtitles.Count == 0)
+                //{
+                    //return await GetSubtitlesAsync(aid, cid, epId, true);
+                //}
                 return subtitles;
             }
             catch (Exception)
