@@ -30,8 +30,8 @@ namespace BBDown
             string prefix = tvApi ? (bangumi ? "api.snm0516.aisee.tv/pgc/player/api/playurltv" : "api.snm0516.aisee.tv/x/tv/ugc/playurl")
                         : (bangumi ? "api.bilibili.com/pgc/player/web/playurl" : "api.bilibili.com/x/player/playurl");
             string api = $"https://{prefix}?avid={aid}&cid={cid}&qn={qn}&type=&otype=json" + (tvApi ? "" : "&fourk=1") +
-                $"&fnver=0&fnval=80" + (tvApi ? "&device=android&platform=android" +
-                "&mobi_app=android_tv_yst&npcybs=0&force_host=0&build=102801" +
+                $"&fnver=0&fnval=4048" + (tvApi ? "&device=android&platform=android" +
+                "&mobi_app=android_tv_yst&npcybs=0&force_host=2&build=102801" +
                 (Program.TOKEN != "" ? $"&access_key={Program.TOKEN}" : "") : "") +
                 (bangumi ? $"&module=bangumi&ep_id={epId}&fourk=1" + "&session=" : "");
             if (tvApi && bangumi)
@@ -69,10 +69,10 @@ namespace BBDown
             return webJson;
         }
 
-        private static async Task<string> GetPlayJsonAsync(string aid, string cid, string epId, string qn)
+        private static async Task<string> GetPlayJsonAsync(string aid, string cid, string epId, string qn, string code = "0")
         {
-            string api = $"https://api.bilibili.tv/intl/gateway/v2/ogv/playurl?" +
-                $"aid={aid}&appkey=7d089525d3611b1c&build=1000310&c_locale=&channel=master&cid={cid}&ep_id={epId}&force_host=0&fnvalfnval=80&fnver=0&fourk=1&lang=hans&locale=zh_CN&mobi_app=bstar_a&platform=android&prefer_code_type=0&qn={qn}&timezone=GMT+08:00&ts={GetTimeStamp(true)}" + (Program.TOKEN != "" ? $"&access_key={Program.TOKEN}" : "");
+            string api = $"https://api.biliintl.com/intl/gateway/v2/ogv/playurl?" +
+                $"aid={aid}&cid={cid}&ep_id={epId}&platform=android&s_locale=zh_SG&prefer_code_type={code}&qn={qn}" + (Program.TOKEN != "" ? $"&access_key={Program.TOKEN}" : "");
             string webJson = await GetWebSourceAsync(api);
             return webJson;
         }
@@ -277,10 +277,9 @@ namespace BBDown
                 v.id = quality;
                 v.dfn = Program.qualitys[quality];
                 v.baseUrl = url;
-                v.codecs = videoCodecid == "12" ? "HEVC" : "AVC";
+                v.codecs = GetVideoCodec(videoCodecid);
                 v.dur = (int)length / 1000;
                 v.size = size;
-                if (onlyHevc && v.codecs == "AVC") { }
                 if (!videoTracks.Contains(v)) videoTracks.Add(v);
             }
 
