@@ -509,8 +509,7 @@ namespace BBDown
 
                 if (selectPage == "LATEST")
                 {
-                    selectedPages = new List<string>();
-                    selectedPages.Add(pagesInfo.Count.ToString());
+                    selectedPages = new List<string> { pagesInfo.Count.ToString() };
                     LogDebug(pagesInfo.Count.ToString());
                 }
 
@@ -585,10 +584,10 @@ namespace BBDown
                     }
 
                     string webJsonStr = "";
-                    List<Video> videoTracks = new List<Video>();
-                    List<Audio> audioTracks = new List<Audio>();
-                    List<string> clips = new List<string>();
-                    List<string> dfns = new List<string>();
+                    List<Video> videoTracks = new();
+                    List<Audio> audioTracks = new();
+                    List<string> clips = new();
+                    List<string> dfns = new();
 
                     string indexStr = myOption.NoPaddingPageNum ? p.index.ToString() : p.index.ToString("0".PadRight(pagesInfo.OrderByDescending(_p => _p.index).First().index.ToString().Length, '0'));
                     string videoPath = $"temp/{p.aid}/{p.aid}.P{indexStr}.{p.cid}.mp4";
@@ -597,7 +596,7 @@ namespace BBDown
                     if (title.EndsWith(".")) title += "_fix";
                     var titleObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
                     title = titleObj.Data.Text;
-                    string ep = p.index.ToString("D2");
+                    string ep = p.ep.ToString("D2");
                     //讀取JSON存放
                     string jsonpath = Directory.GetCurrentDirectory();
                     string jsonfile = File.ReadAllText($"{jsonpath}/config.json");

@@ -62,7 +62,9 @@ namespace BBDown
                     page.GetProperty("cid").ToString(),
                     page.GetProperty("id").ToString(),
                     _title,
-                    0, res);
+                    0, 
+                    res,
+                    Int32.Parse(page.GetProperty("title").ToString()));
                 if (p.epid == id) index = p.index.ToString();
                 pagesInfo.Add(p);
             }
@@ -77,7 +79,6 @@ namespace BBDown
             info.IsBangumi = true;
             info.IsCheese = true;
             info.Index = index;
-
             return info;
         }
     }
