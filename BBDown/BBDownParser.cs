@@ -1,14 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Text;
-using System.Text.RegularExpressions;
-using static BBDown.BBDownUtil;
-using static BBDown.BBDownLogger;
-using static BBDown.BBDownEntity;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using static BBDown.BBDownEntity;
+using static BBDown.BBDownLogger;
+using static BBDown.BBDownUtil;
 
 namespace BBDown
 {
@@ -55,16 +54,19 @@ namespace BBDown
             if (webJson.Contains("\"大会员专享限制\""))
             {
                 string cookiePath = Directory.GetCurrentDirectory();
-                if (File.Exists($"cookie.txt"))
+                if (!File.Exists($"invalid_cookie.txt"))
                 {
-                    File.Delete($"{cookiePath}/cookie.txt");
-                    if (File.Exists($"BBDown.data")) { File.Delete($"{cookiePath}/BBDown.data"); }        
-                    File.Create($"{cookiePath}/cookie.txt");
-                    File.Create($"{cookiePath}/invalid_cookie.txt");
+                    //File.Delete($"{cookiePath}/cookie.txt");
+                    //if (File.Exists($"BBDown.data")) { File.Delete($"{cookiePath}/BBDown.data"); }        
+                    //File.Create($"{cookiePath}/cookie.txt");
+                File.Create($"{cookiePath}/invalid_cookie.txt");
                 }
-                //string webUrl = "https://www.bilibili.com/bangumi/play/ep" + epId;
-                //string webSource = GetWebSource(webUrl);
-                //webJson = Regex.Match(webSource, @"window.__playinfo__=([\s\S]*?)<\/script>").Groups[1].Value;
+                string webUrl = "https://www.bilibili.com/bangumi/play/ep" + epId;
+                string webSource = await GetWebSourceAsync(webUrl);
+                string retryWebJson = Regex.Match(webSource, @"window.__playinfo__=([\\s\\S]*?)<\\/script>").Groups[1].Value;
+                if (!String.IsNullOrEmpty(webJson)) {
+                    webJson = retryWebJson;
+                }
             }
             return webJson;
         }
