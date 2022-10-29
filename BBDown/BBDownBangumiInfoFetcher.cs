@@ -48,7 +48,7 @@ namespace BBDown
             {
                 //跳過預告
                 JsonElement badge;
-                if (page.TryGetProperty("badge", out badge) && badge.ToString() == "預告") continue;
+                if (page.TryGetProperty("badge", out badge) && (badge.ToString() == "預告" || badge.ToString() == "预告")) continue;
                 string res = "";
                 try
                 {
