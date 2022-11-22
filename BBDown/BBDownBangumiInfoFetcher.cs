@@ -64,7 +64,7 @@ namespace BBDown
                     _title,
                     0, 
                     res,
-                    Int32.Parse(page.GetProperty("title").ToString()));
+                    page.GetProperty("title").ToString());
                 if (p.epid == id) index = p.index.ToString();
                 pagesInfo.Add(p);
             }

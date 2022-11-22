@@ -15,9 +15,9 @@ namespace BBDown
             public string title;
             public int dur;
             public string res;
-            public int ep;
+            public string ep;
 
-            public Page(int index, string aid, string cid, string epid, string title, int dur, string res, int ep)
+            public Page(int index, string aid, string cid, string epid, string title, int dur, string res, string ep)
             {
                 this.aid = aid;
                 this.index = index;

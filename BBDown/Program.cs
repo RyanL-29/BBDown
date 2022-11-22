@@ -596,7 +596,10 @@ namespace BBDown
                     if (title.EndsWith(".")) title += "_fix";
                     var titleObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
                     title = titleObj.Data.Text;
-                    string ep = p.ep.ToString("D2");
+                    string ep = p.ep;
+                    if (int.TryParse(p.ep, out _)) { 
+                        ep =  int.Parse(ep).ToString("D2");
+                    }
                     //讀取JSON存放
                     string jsonpath = Directory.GetCurrentDirectory();
                     string jsonfile = File.ReadAllText($"{jsonpath}/config.json");

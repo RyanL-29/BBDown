@@ -35,7 +35,7 @@ namespace BBDown
                     "", //epid
                     page.GetProperty("part").ToString().Trim(),
                     page.GetProperty("duration").GetInt32(),
-                    page.GetProperty("dimension").GetProperty("width").ToString() + "x" + page.GetProperty("dimension").GetProperty("height").ToString(), 0);
+                    page.GetProperty("dimension").GetProperty("width").ToString() + "x" + page.GetProperty("dimension").GetProperty("height").ToString(), 0.ToString());
                 pagesInfo.Add(p);
             }
 
