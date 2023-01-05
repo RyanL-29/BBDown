@@ -141,13 +141,13 @@ namespace BBDown
             {
                 inputArg.Append($" -map {i} ");
             }
-            var titletcovObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
+            var titletcovObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional);
             var titletcov = titletcovObj.Data.Text;
             int isAreaTitle = titletcov.IndexOf("（");
             if (isAreaTitle != -1) {
                 titletcov = titletcov.Remove(isAreaTitle);
             }
-            var desccovObj = await Fanhuaji.ConvertAsync(desc, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
+            var desccovObj = await Fanhuaji.ConvertAsync(desc, Fanhuaji_API.Enum.Enum_Converter.Traditional);
             string desccov = desccovObj.Data.Text;
             //----分析完畢
             var arguments = $"-loglevel warning -y " +

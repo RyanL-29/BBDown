@@ -208,7 +208,7 @@ namespace BBDown
 
             //Fanhuaji-API
             var Fanhuaji = new Fanhuaji(Agree: true, Terms_of_Service: Fanhuaji_API.Fanhuaji.Terms_of_Service);
-            var subObj = await Fanhuaji.ConvertAsync(jsonString, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
+            var subObj = await Fanhuaji.ConvertAsync(jsonString, Fanhuaji_API.Enum.Enum_Converter.Traditional);
             StringBuilder lines = new();
             var json = JsonDocument.Parse(subObj.Data.Text);
             var sub = json.RootElement.GetProperty("body").EnumerateArray().ToList();
@@ -241,7 +241,7 @@ namespace BBDown
             
             //Fanhuaji-API
             var Fanhuaji = new Fanhuaji(Agree: true, Terms_of_Service: Fanhuaji_API.Fanhuaji.Terms_of_Service);
-            var subObj = await Fanhuaji.ConvertAsync(jsonString, Fanhuaji_API.Enum.Enum_Converter.China, new Config() { });
+            var subObj = await Fanhuaji.ConvertAsync(jsonString, Fanhuaji_API.Enum.Enum_Converter.China);
             StringBuilder lines = new StringBuilder();
             var json = JsonDocument.Parse(subObj.Data.Text);
             var sub = json.RootElement.GetProperty("body").EnumerateArray().ToList();

@@ -27,7 +27,7 @@
 
 
   <ItemGroup>
-    <PackageReference Include="Fanhuaji-API" Version="1.0.0" />
+    <PackageReference Include="Fanhuaji-API" Version="1.1.0" />
     <PackageReference Include="SharpZipLib" Version="1.3.3" />
     <PackageReference Include="protobuf-net" Version="3.0.101" />
     <PackageReference Include="QRCoder" Version="1.4.1" />

@@ -594,7 +594,7 @@ namespace BBDown
                     string audioPath = $"temp/{p.aid}/{p.aid}.P{indexStr}.{p.cid}.m4a";
                     //處理文件夾以.結尾導致的異常情況
                     if (title.EndsWith(".")) title += "_fix";
-                    var titleObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional, new Config() { });
+                    var titleObj = await Fanhuaji.ConvertAsync(title, Fanhuaji_API.Enum.Enum_Converter.Traditional);
                     title = titleObj.Data.Text;
                     string ep = p.ep;
                     if (int.TryParse(p.ep, out _)) { 
