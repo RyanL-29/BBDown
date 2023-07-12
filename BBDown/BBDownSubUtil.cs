@@ -89,72 +89,103 @@ namespace BBDown
                         subtitles.Add(subtitleb);
                     }
                 }
-                //無字幕片源 但是字幕沒上導致的空列表，嘗試從國際介面獲取
-                //if (subtitles.Count == 0)
-                //{
-                    //return await GetSubtitlesAsync(aid, cid, epId, true);
-                //}
                 return subtitles;
             }
             catch (Exception)
             {
-                try
-                {
-                    //grpc調用介面 protobuf
-                    string api = "https://app.biliapi.net/bilibili.community.service.dm.v1.DM/DmView";
-                    int _aid = Convert.ToInt32(aid);
-                    int _cid = Convert.ToInt32(cid);
-                    int _type = 1;
-                    byte[] data = new byte[18];
-                    data[0] = 0x0; data[1] = 0x0; data[2] = 0x0; data[3] = 0x0; data[4] = 0xD; //先固定死了
-                    int i = 5;
-                    data[i++] = Convert.ToByte(1 << 3 | 0); // index=1
-                    while ((_aid & -128) != 0)
-                    {
-                        data[i++] = Convert.ToByte((_aid & 127) | 128);
-                        _aid = _aid >> 7;
-                    }
-                    data[i++] = Convert.ToByte(_aid);
-                    data[i++] = Convert.ToByte(2 << 3 | 0); // index=2
-                    while ((_cid & -128) != 0)
-                    {
-                        data[i++] = Convert.ToByte((_cid & 127) | 128);
-                        _cid = _cid >> 7;
-                    }
-                    data[i++] = Convert.ToByte(_cid);
-                    data[i++] = Convert.ToByte(3 << 3 | 0); // index=3
-                    data[i++] = Convert.ToByte(_type);
-                    string t = await GetPostResponseAsync(api, data);
-                    Regex reg = new Regex("(zh-Han[st]).*?(http.*?\\.json)");
-                    foreach (Match m in reg.Matches(t))
+                try {
+                    string api = $"https://api.bilibili.com/x/player/v2?cid={cid}&aid={aid}";
+                    string json = await GetWebSourceAsync(api);
+                    using var infoJson = JsonDocument.Parse(json);
+                    var subs = infoJson.RootElement.GetProperty("data").GetProperty("subtitle").GetProperty("subtitles").EnumerateArray();
+                    foreach (var sub in subs)
                     {
                         Subtitle subtitle = new Subtitle();
-                        subtitle.url = m.Groups[2].Value;
-                        subtitle.lan = m.Groups[1].Value;
+                        subtitle.url = "https:" + sub.GetProperty("subtitle_url").ToString();
+                        subtitle.lan = sub.GetProperty("lan").ToString();
                         subtitle.path = $"temp/{aid}/{aid}.{cid}.{subtitle.lan}.srt";
                         subtitles.Add(subtitle);
                         if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN" || subtitle.lan == "zh-Hant" || subtitle.lan == "zh-hant")
                         {
                             Log("字幕修正中: 簡轉繁...");
                             Subtitle subtitleb = new Subtitle();
-                            subtitleb.url = m.Groups[2].Value;
+                            subtitleb.url = "https:" +  sub.GetProperty("subtitle_url").ToString();
                             subtitleb.lan = "chs-cht";
                             subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
                             subtitles.Add(subtitleb);
                         }
-                        else if (subtitle.lan == "zh-hant" || subtitle.lan == "zh-Hant" || subtitle.lan == "cmn-hant" || subtitle.lan == "zh-TW" || subtitle.lan == "zh-HK" || subtitle.lan == "zh-MO")
+                        if (subtitle.lan == "zh-hant" || subtitle.lan == "zh-Hant" || subtitle.lan == "cmn-hant" || subtitle.lan == "zh-TW" || subtitle.lan == "zh-HK" || subtitle.lan == "zh-MO")
                         {
                             Log("字幕修正中: 繁轉簡...");
                             Subtitle subtitleb = new Subtitle();
-                            subtitleb.url = m.Groups[2].Value;
+                            subtitleb.url = "https:" + sub.GetProperty("subtitle_url").ToString();
                             subtitleb.lan = "cht-chs";
                             subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
                             subtitles.Add(subtitleb);
                         }
                     }
                     return subtitles;
+                } catch (Exception)
+                {
+                    try
+                    {
+                        //grpc調用介面 protobuf
+                        string api = "https://app.biliapi.net/bilibili.community.service.dm.v1.DM/DmView";
+                        int _aid = Convert.ToInt32(aid);
+                        int _cid = Convert.ToInt32(cid);
+                        int _type = 1;
+                        byte[] data = new byte[18];
+                        data[0] = 0x0; data[1] = 0x0; data[2] = 0x0; data[3] = 0x0; data[4] = 0xD; //先固定死了
+                        int i = 5;
+                        data[i++] = Convert.ToByte(1 << 3 | 0); // index=1
+                        while ((_aid & -128) != 0)
+                        {
+                            data[i++] = Convert.ToByte((_aid & 127) | 128);
+                            _aid = _aid >> 7;
+                        }
+                        data[i++] = Convert.ToByte(_aid);
+                        data[i++] = Convert.ToByte(2 << 3 | 0); // index=2
+                        while ((_cid & -128) != 0)
+                        {
+                            data[i++] = Convert.ToByte((_cid & 127) | 128);
+                            _cid = _cid >> 7;
+                        }
+                        data[i++] = Convert.ToByte(_cid);
+                        data[i++] = Convert.ToByte(3 << 3 | 0); // index=3
+                        data[i++] = Convert.ToByte(_type);
+                        string t = await GetPostResponseAsync(api, data);
+                        Regex reg = new Regex("(zh-Han[st]).*?(http.*?\\.json)");
+                        foreach (Match m in reg.Matches(t))
+                        {
+                            Subtitle subtitle = new Subtitle();
+                            subtitle.url = m.Groups[2].Value;
+                            subtitle.lan = m.Groups[1].Value;
+                            subtitle.path = $"temp/{aid}/{aid}.{cid}.{subtitle.lan}.srt";
+                            subtitles.Add(subtitle);
+                            if (subtitle.lan == "zh-hans" || subtitle.lan == "zh-Hans" || subtitle.lan == "cmn-hans" || subtitle.lan == "zh-CN" || subtitle.lan == "zh-Hant" || subtitle.lan == "zh-hant")
+                            {
+                                Log("字幕修正中: 簡轉繁...");
+                                Subtitle subtitleb = new Subtitle();
+                                subtitleb.url = m.Groups[2].Value;
+                                subtitleb.lan = "chs-cht";
+                                subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
+                                subtitles.Add(subtitleb);
+                            }
+                            else if (subtitle.lan == "zh-hant" || subtitle.lan == "zh-Hant" || subtitle.lan == "cmn-hant" || subtitle.lan == "zh-TW" || subtitle.lan == "zh-HK" || subtitle.lan == "zh-MO")
+                            {
+                                Log("字幕修正中: 繁轉簡...");
+                                Subtitle subtitleb = new Subtitle();
+                                subtitleb.url = m.Groups[2].Value;
+                                subtitleb.lan = "cht-chs";
+                                subtitleb.path = $"temp/{aid}/{aid}.{cid}.{subtitleb.lan}.srt";
+                                subtitles.Add(subtitleb);
+                            }
+                        }
+                        return subtitles;
+                    }
+                    catch (Exception) { return subtitles; } //返回空列表
                 }
-                catch (Exception) { return subtitles; } //返回空列表
+
             }
         }
 
