@@ -164,14 +164,15 @@ namespace BBDown
                         v.dfn = Program.qualitys[v.id];
                         v.bandwith = Convert.ToInt64(node.GetProperty("bandwidth").ToString()) / 1000;
                         v.baseUrl = node.GetProperty("base_url").ToString();
-                        v.codecs = node.GetProperty("codecid").ToString() == "12" ? "HEVC" : "AVC";
+                        v.codecs = GetVideoCodec(node.GetProperty("codecid").ToString());
+                        v.size = node.TryGetProperty("size", out var sizeNode) ? Convert.ToDouble(sizeNode.ToString()) : 0;
                         if (!tvApi && !appApi)
                         {
                             v.res = node.GetProperty("width").ToString() + "x" + node.GetProperty("height").ToString();
                             v.fps = node.GetProperty("frame_rate").ToString();
                         }
-                        if (onlyHevc && v.codecs == "AVC") continue;
-                        if (onlyAvc && v.codecs == "HEVC") continue;
+                        if (onlyHevc && v.codecs != "HEVC") continue;
+                        if (onlyAvc && v.codecs != "AVC") continue;
                         if (!videoTracks.Contains(v)) videoTracks.Add(v);
                     }
                 }

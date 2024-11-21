@@ -646,7 +646,7 @@ namespace BBDown
                                 foreach (var v in videoTracks)
                                 {
                                     int pDur = p.dur == 0 ? v.dur : p.dur;
-                                    LogColor($"{index++}. [{v.dfn}] [{v.res}] [{v.codecs}] [{v.fps}] [{v.bandwith} kbps] [~{FormatFileSize(pDur * v.bandwith * 1024 / 8)}]".Replace("[] ", ""), false);
+                                    LogColor($"{index++}. [{v.dfn}] [{v.res}] [{v.codecs}] [{v.fps}] [{v.bandwith} kbps] [{FormatFileSize(v.size)}]".Replace("[] ", ""), false);
                                     if (infoMode) Console.WriteLine(v.baseUrl);
                                 }
                             }
