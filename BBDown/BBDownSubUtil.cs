@@ -397,7 +397,7 @@ namespace BBDown
             {"fil", "Pilipino"}, {"ku", "Kurdî"},
             {"ca", "català"}, {"no", "norsk språk"},
             {"chs-cht", "中文（簡轉繁）"}, {"cht-chs", "中文（繁轉簡）"},
-            {"ai-Zh", "中文（简体, AI识别）"},
+            {"ai-zh", "中文（簡體, AI）"},
         };
 
         public static Dictionary<string, string> SubLangDic = new Dictionary<string, string> 
@@ -446,7 +446,7 @@ namespace BBDown
             {"fil", "phi"}, {"ku", "kur"},
             {"ca", "cat"}, {"no", "nor"},
             {"hu", "hun"},{"chs-cht", "chi"},
-            {"cht-chs", "chi"}, { "ai-Zh", "chi" }
+            {"cht-chs", "chi"}, { "ai-zh", "chi" }
         };
 
         public static Dictionary<string, string> SubTitleDic = new Dictionary<string, string>
@@ -500,7 +500,7 @@ namespace BBDown
             {"fil", "Pilipino"}, {"ku", "Kurdî"},
             {"ca", "català"}, {"no", "norsk språk"},
             {"chs-cht", "中文（簡轉繁）"}, {"cht-chs", "中文（繁轉簡）"},
-            {"ai-Zh", "中文（简体, AI识别）"}
+            {"ai-zh", "中文（簡體, AI）"}
         };
     }
 }
