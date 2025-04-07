@@ -184,13 +184,21 @@ namespace BBDown
                 string jsonfile = File.ReadAllText($"{jsonpath}/config.json");
                 var configjson = JsonDocument.Parse(jsonfile);
                 var UA = configjson.RootElement.GetProperty("UserAgent");
+                var webRequestClient = new HttpClient();
                 using var webRequest = new HttpRequestMessage(HttpMethod.Get, url);
-                webRequest.Headers.Add("UserAgent", UA.ToString());
-                webRequest.Headers.Add("Accept-Encoding", "gzip, deflate");
-                webRequest.Headers.Add("Cookie", (url.Contains("/ep") || url.Contains("/ss")) ? Program.COOKIE + ";CURRENT_FNVAL=4048;" : Program.COOKIE);
+                webRequest.Headers.Add("User-Agent", UA.ToString());
+                webRequest.Headers.Add("Accept-Encoding", "gzip, deflate, br");
+                var request_cookie = Program.COOKIE.ToString();
+                if (!request_cookie.EndsWith(";")) {
+                    request_cookie += ";";
+                }
+                if (url.Contains("/ep") || url.Contains("/ss")) {
+                    request_cookie += "CURRENT_FNVAL=4048;";
+                }
+                    webRequest.Headers.Add("Cookie", request_cookie);
                 if (url.Contains("api.bilibili.com/pgc/player/web/playurl") || url.Contains("api.bilibili.com/pugv/player/web/playurl"))
                     webRequest.Headers.Add("Referer", "https://www.bilibili.com");
-                webRequest.Headers.CacheControl = CacheControlHeaderValue.Parse("no-cache");
+                //webRequest.Headers.CacheControl = CacheControlHeaderValue.Parse("no-cache");
                 webRequest.Headers.Connection.Clear();
                 LogDebug("获取网页内容：Url: {0}, Headers: {1}", url, webRequest.Headers);
                 var webResponse = (await AppHttpClient.SendAsync(webRequest, HttpCompletionOption.ResponseHeadersRead)).EnsureSuccessStatusCode();

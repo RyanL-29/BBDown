@@ -105,7 +105,7 @@ namespace BBDown
             List<Subtitle> subtitles = new List<Subtitle>();
 
             try {
-                    string api = $"https://api.bilibili.com/x/player/v2?aid={aid}&cid={cid}";
+                    string api = $"https://api.bilibili.com/x/player/wbi/v2?aid={aid}&cid={cid}";
                     string json = await GetWebSourceAsync(api);
                     using var infoJson = JsonDocument.Parse(json);
                     var subs = infoJson.RootElement.GetProperty("data").GetProperty("subtitle").GetProperty("subtitles").EnumerateArray();
@@ -213,12 +213,12 @@ namespace BBDown
             else {
                 if (Program.COOKIE == "")
                 {
-                    subtitles = await GetSubtitlesFromApi3Async(aid, cid, epId); // 未登录只有APP可以拿到字幕了
+                    subtitles = await GetSubtitlesFromApi2Async(aid, cid, epId); // 未登录只有APP可以拿到字幕了
                 }
                 else {
-                    subtitles = await GetSubtitlesFromApi1Async(aid, cid, epId)
+                    subtitles = await GetSubtitlesFromApi2Async(aid, cid, epId)
                                 ?? await GetSubtitlesFromApi3Async(aid, cid, epId)
-                                ?? await GetSubtitlesFromApi2Async(aid, cid, epId);
+                                ?? await GetSubtitlesFromApi1Async(aid, cid, epId);
                 }
             }
 
@@ -226,8 +226,12 @@ namespace BBDown
                 return new List<Subtitle>();
             }
 
-            //有空的URL 不合法
-            subtitles = subtitles.Where(info => !string.IsNullOrEmpty(info.url)).ToList();
+            //修正 url 协议
+            subtitles.ForEach(item =>
+            {
+                if (item.url.StartsWith("//"))
+                    item.url = "https:" + item.url;
+            });
 
             return subtitles;
         }
