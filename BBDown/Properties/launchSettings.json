@@ -2,7 +2,7 @@
   "profiles": {
     "BBDown": {
       "commandName": "Project",
-      "commandLineArgs": "-p 1 -info https://www.bilibili.com/bangumi/play/ep1115686",
+      "commandLineArgs": "-p 8 -mt https://www.bilibili.com/bangumi/play/ep1115686",
       "workingDirectory": "C:\\Users\\Ryan\\Documents\\source\\ANi_System\\test\\BBDown_Test"
     }
   }

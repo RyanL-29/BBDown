@@ -10,7 +10,6 @@ using System.Text.Json;
 using System.Linq;
 using System.Threading.Tasks;
 using Fanhuaji_API;
-using System.Reflection;
 
 namespace BBDown
 {
@@ -106,7 +105,7 @@ namespace BBDown
             List<Subtitle> subtitles = new List<Subtitle>();
 
             try {
-                    string api = $"https://api.bilibili.com/x/player/v2?cid={cid}&aid={aid}";
+                    string api = $"https://api.bilibili.com/x/player/v2?aid={aid}&cid={cid}";
                     string json = await GetWebSourceAsync(api);
                     using var infoJson = JsonDocument.Parse(json);
                     var subs = infoJson.RootElement.GetProperty("data").GetProperty("subtitle").GetProperty("subtitles").EnumerateArray();
@@ -211,10 +210,16 @@ namespace BBDown
             if (intl) {
                 subtitles = await GetIntlSubtitlesFromApiAsync(aid, cid, epId);
             }
-            else { 
-                subtitles = await GetSubtitlesFromApi2Async(aid, cid, epId)
-                    ?? await GetSubtitlesFromApi1Async(aid, cid, epId)
-                    ?? await GetSubtitlesFromApi3Async(aid, cid, epId);
+            else {
+                if (Program.COOKIE == "")
+                {
+                    subtitles = await GetSubtitlesFromApi3Async(aid, cid, epId); // 未登录只有APP可以拿到字幕了
+                }
+                else {
+                    subtitles = await GetSubtitlesFromApi1Async(aid, cid, epId)
+                                ?? await GetSubtitlesFromApi3Async(aid, cid, epId)
+                                ?? await GetSubtitlesFromApi2Async(aid, cid, epId);
+                }
             }
 
             if (subtitles == null) {
